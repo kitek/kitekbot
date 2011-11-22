@@ -35,6 +35,7 @@ def main():
 		
 		# XMPP
 		('/_ah/xmpp/message/chat/', messageHandler.MessageHandler),
+		('/_ah/xmpp/message/error/', messageHandler.MessageErrHandler),
 		('/_ah/xmpp/subscription/subscribe/', subscirbeHandler.SubscirbeHandler),
 		('/_ah/xmpp/subscription/subscribed/', subscirbeHandler.SubscirbedHandler),
 		('/_ah/xmpp/subscription/unsubscribed/', unsubscirbeHandler.UnSubscirbeHandler),

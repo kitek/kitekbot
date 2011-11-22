@@ -91,7 +91,7 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 				else:
 					message.reply('Informacje od użytkowników systemu nie będą już więcej wysyłane do Ciebie. Zawsze możesz to zmienić wpisująć /info on')
 				return True
-			message.reply('Wpisz dłuższą wiadomość (minimum to 1 znak).')
+			message.reply('Wpisz dłuższą wiadomość (minimum to 2 znaki).')
 			return False
 		
 		r = Roster.all()
@@ -309,3 +309,10 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 			return False
 		else:
 			return True
+
+class MessageErrHandler(xmpp_handlers.CommandHandler):
+	def text_message(self, message=None):
+		logging.error(message)
+
+	def unhandled_command(self, message=None):
+		logging.error(message)
