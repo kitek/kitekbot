@@ -25,10 +25,7 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 	})
 	
 	def text_message(self, message=None):
-		jid = message.sender.split('/')[0]
-		if Roster.check_jid(jid) == False:
-			return False
-		message.reply("Nieznana komenda. Wpisz \help by wyświetlić pomoc.")
+		self.info_command(message)
 		
 	def unhandled_command(self, message=None):
 		jid = message.sender.split('/')[0]
@@ -80,7 +77,7 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 		info = message.arg.strip().replace("\r"," ")
 		info = re.sub('\n',' ',info)
 		logging.info('INFO: %s from %s' % (info,jid))
-		if(len(info) < 5):
+		if(len(info) <= 1):
 			if info in ['off','on']:
 				infoCmd = False;
 				if info == 'on':
@@ -94,7 +91,7 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 				else:
 					message.reply('Informacje od użytkowników systemu nie będą już więcej wysyłane do Ciebie. Zawsze możesz to zmienić wpisująć /info on')
 				return True
-			message.reply('Wpisz dłuższą wiadomość (minimum to 5 znaków).')
+			message.reply('Wpisz dłuższą wiadomość (minimum to 1 znak).')
 			return False
 		
 		r = Roster.all()
@@ -104,11 +101,10 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 		if len(items) == 0:
 			message.reply('Brak osób które mogłyby odpowiedzieć na Twoją wiadomość (wszyscy wyłączyli sobie chęć odbierania tego typu powiadomień?).')
 			return False
-		message.reply('Twoja informacja została wysłana do %s osób.' % (len(items)))
 		jids = []
 		for item in items:
 			jids.append(item.jid)
-		xmpp.send_message(jids,u'%s przesyła informację: %s' % (jid.replace('@firma.fotka.pl',''),info))
+		xmpp.send_message(jids,u'%s: %s' % (jid.replace('@firma.fotka.pl',''),info))
 		mes = InfoMessages(jid=jid,message=info)
 		mes.put()
 	
