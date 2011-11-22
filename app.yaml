@@ -32,3 +32,4 @@ inbound_services:
 - xmpp_message
 - xmpp_subscribe
 - xmpp_presence
+- warmup

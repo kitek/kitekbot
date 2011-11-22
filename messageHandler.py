@@ -4,25 +4,9 @@
 from google.appengine.api import xmpp
 from google.appengine.ext.webapp import xmpp_handlers
 from botModels import Version, Sync, Roster, SyncAnswers, InfoMessages, Menu, Presence
-import logging, re, time, datetime
+import logging, re, time, datetime, settings
 
 class MessageHandler(xmpp_handlers.CommandHandler):
-	syncAllowMinutes = 5
-	usersLimit = 100
-	
-	commands = dict({
-		'help':'Wyświetla informacje o dostępnych komendach systemu',
-		'help nazwaPolecenia':'Wyświetla szczegółową pomoć dla podanego polecenia',
-		'sync plik1...plikN':'Wysyła informacje o plikach do synchronizacji',
-		'sync on|off':'Włącza/Wyłącza otrzymywanie informacji o synchronizowanych plikach',
-		'info TwojaWiadomość':'Wysyła dowolną wiadomość do osób, które chcą otrzymywać tego rodzaju komunikaty',
-		'info on|off':'Włącza/Wyłącza otrzymywanie informacji od użytkowników systemu',
-		'menu (jutro)':'Wyświetla menu obiadowe na dzisiejszy / jutrzejszy dzień'
-	})
-	commands_help = dict({
-		'sync':'Lorem ipsum for sync',
-		'info':'Lorem ipsum for info'
-	})
 	
 	def text_message(self, message=None):
 		self.info_command(message)
@@ -97,7 +81,7 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 		r = Roster.all()
 		r.filter("jid !=",jid)
 		r.filter("infoCmd =",True)
-		items = r.fetch(self.usersLimit)
+		items = r.fetch(settings.BROADCAST_USERS_LIMIT)
 		if len(items) == 0:
 			message.reply('Brak osób które mogłyby odpowiedzieć na Twoją wiadomość (wszyscy wyłączyli sobie chęć odbierania tego typu powiadomień?).')
 			return False
@@ -206,7 +190,7 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 				difference = datetime.datetime.now() - t
 				minutes, seconds = divmod(difference.seconds, 60)
 				logging.info('SYNC ok diff: %s' % (minutes))
-				if minutes > self.syncAllowMinutes:
+				if minutes > settings.SYNC_LIMIT_MIN:
 					message.reply('W tej chwili nikt nie synchronizuje plików. Ostatnia prośba o synchro miało miejsce %s minut temu.' % (minutes))
 					return False
 				#Sprawdz czy synchro nie robie ja sam
@@ -242,13 +226,13 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 				difference = datetime.datetime.now() - t
 				minutes, seconds = divmod(difference.seconds, 60)
 				logging.info('SYNC diff: %s' % (minutes))
-				if self.syncAllowMinutes > minutes:
-					message.reply('W ciągu ostatnich %s minut synchronizowałeś już pliki. Odczekaj troszkę i daj odpocząć serwerom :)' % (self.syncAllowMinutes))
+				if settings.SYNC_LIMIT_MIN > minutes:
+					message.reply('W ciągu ostatnich %s minut synchronizowałeś już pliki. Odczekaj troszkę i daj odpocząć serwerom :)' % (settings.SYNC_LIMIT_MIN))
 					return False
 			r = Roster.all()
 			r.filter("jid !=",jid)
 			r.filter("syncCmd =",True)
-			items = r.fetch(self.usersLimit)
+			items = r.fetch(settings.BROADCAST_USERS_LIMIT)
 			if(len(items) == 0):
 				message.reply('Brak osób które mogłyby odpowiedzieć na Twoją synchronizację (wszyscy wyłączyli sobie chęć odbierania tego typu powiadomień?).')
 				return False
@@ -266,7 +250,7 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 				if len(presence) > 0 and presence[0].type == Presence.AVAILABLE:
 					usersOnline+=1
 			# Informacja o synchro została wysłana do 5 osób (w tym 2 Idle) <-- tu powinno byc sprawdzone kto jest online 
-			message.reply('Informacja o synchro została wysłana do %s osób (w tym %s online). Jeżeli w przeciągu %s minut ktoś odpowie na Twoją prośbę zostaniesz o tym automatycznie poinformowany.' % (len(items),usersOnline,self.syncAllowMinutes))
+			message.reply('Informacja o synchro została wysłana do %s osób (w tym %s online). Jeżeli w przeciągu %s minut ktoś odpowie na Twoją prośbę zostaniesz o tym automatycznie poinformowany.' % (len(items),usersOnline,settings.SYNC_LIMIT_MIN))
 			jids = []
 			for item in items:
 				jids.append(item.jid)
@@ -282,15 +266,15 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 		info = message.arg.strip().replace("\r"," ")
 		info = re.sub('\n',' ',info)
 		
-		if info != None and self.commands_help.has_key(info):
-			message.reply(self.commands_help[info])
+		if info != None and settings.COMMANDS_HELP.has_key(info):
+			message.reply(settings.COMMANDS_HELP[info])
 			return True
 			
 		cmd = ""
-		keys = self.commands.keys()
+		keys = settings.COMMANDS_DESC.keys();
 		keys.sort()
 		for key in keys:
-			cmd += "/"+key+" - "+self.commands[key]+"\n"
+			cmd += "/"+key+" - "+settings.COMMANDS_DESC[key]+"\n"
 		
 		# link do webGUI
 		gui_hash = ''
@@ -298,14 +282,14 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 		if(user != None):
 			gui_hash = str(user.key())
 		
-		message.reply("Devel ver. %s\nLista dostępnych poleceń:\n%s\n\nLink do webGUI: %s" % (Version.getMajorVersion(), cmd, Roster.webgui_link+gui_hash))
+		message.reply("Devel ver. %s\nLista dostępnych poleceń:\n%s\n\nLink do webGUI: %s" % (Version.getMajorVersion(), cmd, settings.WEBGUI_URL+gui_hash))
 		return True
 	def _checkSyncTime(self,item):
 		t = datetime.datetime(*time.strptime(str(item.created).split('.')[0],"%Y-%m-%d %H:%M:%S")[0:5])
 		difference = datetime.datetime.now() - t
 		minutes, seconds = divmod(difference.seconds, 60)
 		logging.info('SYNC ok diff: %s' % (minutes))
-		if minutes > self.syncAllowMinutes:
+		if minutes > settings.SYNC_LIMIT_MIN:
 			return False
 		else:
 			return True

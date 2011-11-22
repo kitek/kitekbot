@@ -4,8 +4,8 @@
 from google.appengine.ext import db
 from google.appengine.api import xmpp
 from google.appengine.api import memcache
-#from search.core import SearchIndexProperty, porter_stemmer
 import random
+import settings
 
 # Utilities models
 
@@ -62,9 +62,6 @@ class SyncAnswers(db.Model):
 
 class Roster(db.Model):
 	"""key name = user id"""
-	botJid = 'kitekbot@appspot.com'
-	webgui_link = 'http://kitekbot.appspot.com/login?hash='
-	
 	jid = db.StringProperty(required=True)
 	password = db.StringProperty(required=False)
 	created = db.DateTimeProperty(auto_now_add=True)
@@ -73,8 +70,6 @@ class Roster(db.Model):
 	# @todo Ustawienia trzeba przeniesc do innej tabelki
 	syncCmd = db.BooleanProperty(default=True)
 	infoCmd = db.BooleanProperty(default=True)
-	
-	_welcomeMessage = 'Witaj w systemie Devel. Listę dostępnych komend wyświetlisz wpisując /help'
 
 	@staticmethod
 	def check_jid(jid):
@@ -82,7 +77,7 @@ class Roster(db.Model):
 		if r <> None:
 			return True
 		else:
-			xmpp.send_presence(jid,'',Roster.botJid,xmpp.PRESENCE_TYPE_UNAVAILABLE,xmpp.PRESENCE_SHOW_NONE)
+			xmpp.send_presence(jid,'',settings.BOT_JID,xmpp.PRESENCE_TYPE_UNAVAILABLE,xmpp.PRESENCE_SHOW_NONE)
 			return False
 
 	@staticmethod
