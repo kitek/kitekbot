@@ -1,0 +1,45 @@
+indexes:
+
+- kind: Presence
+  properties:
+  - name: userRef
+  - name: __key__
+    direction: desc
+
+- kind: Roster
+  properties:
+  - name: infoCmd
+  - name: jid
+
+- kind: Roster
+  properties:
+  - name: jid
+  - name: __key__
+    direction: desc
+
+- kind: Roster
+  properties:
+  - name: syncCmd
+  - name: jid
+
+- kind: Sync
+  properties:
+  - name: __key__
+    direction: desc
+
+- kind: Sync
+  properties:
+  - name: done
+  - name: __key__
+    direction: desc
+
+- kind: Sync
+  properties:
+  - name: jid
+  - name: __key__
+    direction: desc
+    
+- kind: Solution
+  properties:
+  - name: __key__
+    direction: desc

@@ -1,0 +1,4 @@
+cron:
+- description: synchro wysylanie odpowiedzi
+  url: /cron/sync
+  schedule: every 1 minutes

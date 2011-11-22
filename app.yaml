@@ -1,0 +1,34 @@
+application: kitekbot
+version: 1
+runtime: python
+api_version: 1
+
+builtins:
+- datastore_admin: on
+
+handlers:
+- url: /cron/.*
+  script: bot.py
+  login: admin
+
+- url: /favicon\.ico
+  static_files: static/images/favicon.ico
+  mime_type: vnd.microsoft.icon
+  upload: static/images/favicon\.ico
+
+- url: /css/(.*\.css)
+  static_files: static/css/\1
+  upload: static/css/(.*\.css)
+  
+- url: /img/(.*\.(png|gif|jpg))
+  static_files: static/images/\1
+  upload: static/images/(.*\.(png|gif|jpg))
+  
+- url: /.*
+  script: bot.py
+
+
+inbound_services:
+- xmpp_message
+- xmpp_subscribe
+- xmpp_presence

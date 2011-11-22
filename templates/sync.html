@@ -1,0 +1,9 @@
+<h1>Ostatnie {{ ile }} synchronizacji</h1>
+{% for item in lastSync %}
+<div style="border:1px solid #f00;margin-top:5px;width:50%;padding:5px;">
+	Autor: {{ item.jid }}<br />
+	Data: {{ item.created|date:"Y-m-d H:i" }}<br />
+	Pliki: {{ item.files|escape }}<br />
+	Wynik: {{ item.za }} za, {{ item.przeciw }} przeciw
+</div>
+{% endfor %}
