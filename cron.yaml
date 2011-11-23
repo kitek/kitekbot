@@ -1,4 +1,5 @@
 cron:
 - description: synchro wysylanie odpowiedzi
   url: /cron/sync
-  schedule: every 1 minutes
+  schedule: every 1 minutes from 7:00 to 18:00
+  timezone: Europe/Warsaw

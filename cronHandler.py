@@ -5,7 +5,7 @@ from google.appengine.ext import webapp
 from google.appengine.api import xmpp
 from datetime import datetime
 from botModels import Roster, Sync, SyncAnswers
-import logging, time, datetime, messageHandler
+import logging, time, datetime, messageHandler, settings
 
 class CronHandler(webapp.RequestHandler):
 
@@ -27,7 +27,7 @@ class CronHandler(webapp.RequestHandler):
 			t = datetime.datetime(*time.strptime(str(item.created).split('.')[0],"%Y-%m-%d %H:%M:%S")[0:5])
 			difference = datetime.datetime.now() - t
 			minutes, seconds = divmod(difference.seconds, 60)
-			if minutes > messageHandler.MessageHandler.syncAllowMinutes:
+			if minutes > settings.SYNC_LIMIT_MIN:
 				logging.info('Szukam SyncAnswers.syncId = %s', (item.key().id()))
 				ans = SyncAnswers.all()
 				ans.filter('syncId =',item.key().id())
