@@ -62,21 +62,21 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 		info = re.sub('\n',' ',info)
 		logging.info('INFO: %s from %s' % (info,jid))
 		if(len(info) <= 1):
-			if info in ['off','on']:
-				infoCmd = False;
-				if info == 'on':
-					infoCmd = True
-				r = Roster.findByJid(jid)
-				if r <> None:
-					r.infoCmd = infoCmd
-					r.put()
-				if infoCmd:
-					message.reply('Od tej chwili będziesz otrzymywał informacje od użytkowników systemu. Zawsze możesz to zmienić wpisująć /info off')
-				else:
-					message.reply('Informacje od użytkowników systemu nie będą już więcej wysyłane do Ciebie. Zawsze możesz to zmienić wpisująć /info on')
-				return True
 			message.reply('Wpisz dłuższą wiadomość (minimum to 2 znaki).')
 			return False
+		if info in ['off','on']:
+			infoCmd = False;
+			if info == 'on':
+				infoCmd = True
+			r = Roster.findByJid(jid)
+			if r <> None:
+				r.infoCmd = infoCmd
+				r.put()
+			if infoCmd:
+				message.reply('Od tej chwili będziesz otrzymywał informacje od użytkowników systemu. Zawsze możesz to zmienić wpisująć /info off')
+			else:
+				message.reply('Informacje od użytkowników systemu nie będą już więcej wysyłane do Ciebie. Zawsze możesz to zmienić wpisująć /info on')
+			return True
 		
 		r = Roster.all()
 		r.filter("jid !=",jid)
