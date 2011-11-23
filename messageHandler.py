@@ -5,6 +5,7 @@ from google.appengine.api import xmpp
 from google.appengine.ext.webapp import xmpp_handlers
 from botModels import Version, Sync, Roster, SyncAnswers, InfoMessages, Menu, Presence
 import logging, re, time, datetime, settings
+import re
 
 class MessageHandler(xmpp_handlers.CommandHandler):
 	
@@ -88,7 +89,7 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 		jids = []
 		for item in items:
 			jids.append(item.jid)
-		xmpp.send_message(jids,u'%s: %s' % (jid.replace('@firma.fotka.pl',''),info))
+		xmpp.send_message(jids,u'%s: %s' % (re.sub(r'([\w\.-]+)@([\w\.-]+)', r'\1',jid),info))
 		mes = InfoMessages(jid=jid,message=info)
 		mes.put()
 	
