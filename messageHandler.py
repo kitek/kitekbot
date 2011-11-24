@@ -3,7 +3,7 @@
 
 from google.appengine.api import xmpp
 from google.appengine.ext.webapp import xmpp_handlers
-from botModels import Version, Sync, Roster, SyncAnswers, InfoMessages, Menu, Presence
+from botModels import Version, Sync, Roster, SyncAnswers, InfoMessages, Menu, PresenceStatus
 import logging, re, time, datetime, settings, re
 
 class MessageHandler(xmpp_handlers.CommandHandler):
@@ -239,17 +239,12 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 				return False
 			sync = Sync(jid=jid,files=pliki)
 			sync.put()
-			logging.info('SYNC: zapisano.')
 			
 			usersOnline = 0
-			for item in items:
-				# Sprawdz status
-				presence = Presence.all()
-				presence.filter('userRef =',item)
-				presence.order("-__key__")
-				presence = presence.fetch(1)
-				if len(presence) > 0 and presence[0].type == Presence.AVAILABLE:
-					usersOnline+=1
+			p = PresenceStatus.all(keys_only=True)
+			p.filter("online =",True)
+			usersOnline = p.count() - 1 if p.count() > 0 else 0
+
 			# Informacja o synchro została wysłana do 5 osób (w tym 2 Idle) <-- tu powinno byc sprawdzone kto jest online 
 			message.reply('Informacja o synchro została wysłana do %s osób (w tym %s online). Jeżeli w przeciągu %s minut ktoś odpowie na Twoją prośbę zostaniesz o tym automatycznie poinformowany.' % (len(items),usersOnline,settings.SYNC_LIMIT_MIN))
 			jids = []

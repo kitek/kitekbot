@@ -1,11 +1,5 @@
 indexes:
 
-- kind: Presence
-  properties:
-  - name: userRef
-  - name: __key__
-    direction: desc
-
 - kind: Roster
   properties:
   - name: infoCmd

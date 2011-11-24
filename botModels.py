@@ -82,12 +82,22 @@ def _generate_key(entity, kwargs):
 		raise TypeError, 'KEY_NAME of %s must be a string or callable' % (
 			entity.entity_type())
 
-"""			
-class Foo(NamedModel):
+
+
+# Struktura przechowująca informacje o osobach online
+class PresenceStatus(NamedModel):
 	KEY_NAME = '%(name)s'
+	AVAILABLE = True
+	UNAVAILABLE = False
 	name = db.StringProperty()
-	online = db.BooleanProperty(default=True)
-"""
+	online = db.BooleanProperty(default=True,indexed=True)
+	last = db.DateTimeProperty(auto_now_add=True)
+
+	@staticmethod
+	def count_online():
+		p = PresenceStatus.all(keys_only=True)
+		p.filter("online =",True)
+		return p.count()
 
 class Menu(db.Model):
 	data = db.DateProperty(required=True)
@@ -157,13 +167,6 @@ class Roster(db.Model):
 		if item != None:
 			db.delete(item.key())
 		return True
-
-class Presence(db.Model):
-	AVAILABLE = 1
-	UNAVAILABLE = 2
-	userRef = db.ReferenceProperty(Roster)
-	created = db.DateTimeProperty(auto_now_add=True)
-	type = db.IntegerProperty(required=True, choices=set([1,2]))
 
 class LogsLogin(db.Model):
 	userRef = db.ReferenceProperty(Roster,required=True)
