@@ -4,12 +4,14 @@
 from google.appengine.api import xmpp
 from google.appengine.ext.webapp import xmpp_handlers
 from botModels import Version, Sync, Roster, SyncAnswers, InfoMessages, Menu, Presence
-import logging, re, time, datetime, settings
-import re
+import logging, re, time, datetime, settings, re
 
 class MessageHandler(xmpp_handlers.CommandHandler):
 	
 	def text_message(self, message=None):
+		if '/' == message.arg.strip()[0]:
+			self.unhandled_command(message)
+			return;
 		self.info_command(message)
 		
 	def unhandled_command(self, message=None):
@@ -22,7 +24,6 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 		jid = message.sender.split('/')[0]
 		if Roster.check_jid(jid) == False:
 			return False
-
 		info = message.arg.strip().replace("\r"," ")
 		info = re.sub('\n',' ',info)
 		logging.info('RESCUE: %s from %s' % (info,jid))
@@ -58,7 +59,6 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 		jid = message.sender.split('/')[0]
 		if Roster.check_jid(jid) == False:
 			return False
-		
 		info = message.arg.strip().replace("\r"," ")
 		info = re.sub('\n',' ',info)
 		logging.info('INFO: %s from %s' % (info,jid))
@@ -297,7 +297,6 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 
 class MessageErrHandler(xmpp_handlers.CommandHandler):
 	def text_message(self, message=None):
-		logging.error(message)
-
+		logging.error('Message error %s from %s' % (message.sender, message.body))
 	def unhandled_command(self, message=None):
-		logging.error(message)
+		logging.error('Message error %s from %s' % (message.sender, message.body))
