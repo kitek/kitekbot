@@ -4,8 +4,8 @@
 from google.appengine.ext import db
 from google.appengine.api import xmpp
 from google.appengine.api import memcache
-import random
-import settings
+import random, settings
+import logging as console
 
 # Utilities models
 class Acl():
@@ -153,18 +153,24 @@ class Roster(db.Model):
 
 	@staticmethod
 	def findByJid(jid):
-		q = Roster.all()
-		q.filter("jid =", jid)
-		item = q.fetch(1)
-		if len(item) == 0:
-			return None
+		data = memcache.get(jid)
+		if data is not None:
+			return data
 		else:
-			return item[0]
+			q = Roster.all()
+			q.filter("jid =", jid)
+			item = q.fetch(1)
+			if len(item) == 0:
+				return None
+			else:
+				memcache.add(jid, item[0])
+				return item[0]
 			
 	@staticmethod
 	def deleteByJid(jid):
 		item = Roster.findByJid(jid)
 		if item != None:
+			memcache.delete(jid)
 			db.delete(item.key())
 		return True
 
