@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from google.appengine.api import xmpp
+from google.appengine.ext import db
 from google.appengine.ext.webapp import xmpp_handlers
 from botModels import Version, Sync, Roster, SyncAnswers, InfoMessages, Menu, PresenceStatus
 import logging, re, time, datetime, settings, re
@@ -90,8 +91,11 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 		for item in items:
 			jids.append(item.jid)
 		xmpp.send_message(jids,u'%s: %s' % (re.sub(r'([\w\.-]+)@([\w\.-]+)', r'\1',jid),info))
-		mes = InfoMessages(jid=jid,message=info)
-		mes.put()
+		try:
+			mes = InfoMessages(jid=jid,message=info)
+			mes.put()
+		except:
+			message.reply('Hurray! BOT exceeded quota limit. Thx You :)');
 	
 	def sync_command(self, message=None):
 		jid = message.sender.split('/')[0]
@@ -292,6 +296,6 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 
 class MessageErrHandler(xmpp_handlers.CommandHandler):
 	def text_message(self, message=None):
-		logging.error('Message error %s from %s' % (message.sender, message.body))
+		logging.error('ERROR messasge %s from %s' % (message.body, message.sender))
 	def unhandled_command(self, message=None):
-		logging.error('Message error %s from %s' % (message.sender, message.body))
+		logging.error('ERROR message %s from %s' % (message.body, message.sender))
