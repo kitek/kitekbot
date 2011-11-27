@@ -8,16 +8,25 @@ Nadpisanie ustawien odbywa się poprzez stworzenie pliku settings_local.py i red
 import os
 
 # MessageHandler
+ROOMS_LIMIT = 10
+ROOMS_MIN_LEN = 2
+ROOMS_USERS_MAX = 100
+ROOMS_NAME_PATT = "a-zA-Z0-9\_\-"
+
+MESSAGE_MIN_LEN = 2
+
+SETTINGS_PER_USER = 100
+
 SYNC_LIMIT_MIN = 5
 BROADCAST_USERS_LIMIT = 100
+
 COMMANDS_DESC = dict({
 		'help':'Wyświetla informacje o dostępnych komendach systemu',
 		'help nazwaPolecenia':'Wyświetla szczegółową pomoć dla podanego polecenia',
 		'sync plik1...plikN':'Wysyła informacje o plikach do synchronizacji',
 		'sync on|off':'Włącza/Wyłącza otrzymywanie informacji o synchronizowanych plikach',
 		'info TwojaWiadomość':'Wysyła dowolną wiadomość do osób, które chcą otrzymywać tego rodzaju komunikaty',
-		'info on|off':'Włącza/Wyłącza otrzymywanie informacji od użytkowników systemu',
-		'menu (jutro)':'Wyświetla menu obiadowe na dzisiejszy / jutrzejszy dzień'
+		'info on|off':'Włącza/Wyłącza otrzymywanie informacji od użytkowników systemu'
 	})
 COMMANDS_HELP = dict({
 		'sync':'Lorem ipsum for sync',

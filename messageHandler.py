@@ -4,7 +4,8 @@
 from google.appengine.api import xmpp
 from google.appengine.ext import db
 from google.appengine.ext.webapp import xmpp_handlers
-from botModels import Version, Sync, Roster, SyncAnswers, InfoMessages, Menu, PresenceStatus
+from datetime import datetime
+from botModels import Version, Sync, Roster, SyncAnswers, InfoMessages, PresenceStatus, RoomSubscriptions, Rooms, DbSettings
 import logging, re, time, datetime, settings, re
 
 class MessageHandler(xmpp_handlers.CommandHandler):
@@ -12,7 +13,10 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 	def text_message(self, message=None):
 		if '/' == message.arg.strip()[0]:
 			self.unhandled_command(message)
-			return;
+			return False
+		if '#' == message.arg.strip()[0]:
+			self.send_to_room(message)
+			return False
 		self.info_command(message)
 		
 	def unhandled_command(self, message=None):
@@ -21,48 +25,89 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 			return False
 		message.reply("Nieznana komenda. Wpisz \help by wyświetlić pomoc.")
 	
-	def rescue_command(self, message=None):
+	# Umożliwia zaproszenie osoby do pokoju /invite piwo radek.gniado
+	def invite_command(self, message=None):
 		jid = message.sender.split('/')[0]
 		if Roster.check_jid(jid) == False:
 			return False
-		info = message.arg.strip().replace("\r"," ")
-		info = re.sub('\n',' ',info)
-		logging.info('RESCUE: %s from %s' % (info,jid))
+		info = message.arg.strip().replace("\r","")
+		info = re.sub('\n','',info)
+		params = info.split(' ');
+		Rooms(name='Rooms',author=jid).invite(jid,params[0],params[1])
 	
-	def menu_command(self, message=None):
+	# /switch piwo
+	def switch_command(self, message=None):
 		jid = message.sender.split('/')[0]
 		if Roster.check_jid(jid) == False:
 			return False
-		info = message.arg.strip().replace("\r"," ")
-		info = re.sub('\n',' ',info)
-		logging.info(info)
-		
-		dzis = datetime.date.today()
-		jutro = dzis + datetime.timedelta(days=1)
-		 
-		if info == 'jutro':
-			qDzien = jutro
-		else:
-			qDzien = dzis
+		info = message.arg.strip().replace("\r","")
+		info = re.sub('\n','',info)
+		Rooms(name='Rooms',author=jid).switch(jid,info)
+		pass
 
-		r = Menu.all()			
-		r.filter("data =",qDzien)			
-		items = r.fetch(1)
-		if(len(items) == 0):
-			message.reply('Brak infomracji o menu obiadowym na dzień: %s' % (qDzien))
+	# Wysyła wiadomość do wszystkich użytkowników w pokoju
+	def send_to_room(self,message=None,roomName=None):
+		jid = message.sender.split('/')[0]
+		if Roster.check_jid(jid) == False:
+			return False
+		info = message.arg.strip().replace("\r"," ")
+		info = re.sub('\n',' ',info)
+		if roomName != None:
+			info = u"#"+roomName+u" "+info
+		return Rooms(name='Rooms',author=jid).send(jid,info)
+
+	# Wyświetla informacje o dostępnych pokojach, wraz z liczbą użytkowników
+	def rooms_command(self, message=None):
+		jid = message.sender.split('/')[0]
+		if Roster.check_jid(jid) == False:
+			return False
+		Rooms(name='Rooms',author=jid).show(jid,message.arg.strip())
+
+	# Umożliwia utworzenie / podłączenie się do pokoju (/join roomName)
+	def join_command(self, message=None):
+		jid = message.sender.split('/')[0]
+		if Roster.check_jid(jid) == False:
+			return False
+		Rooms(name='Rooms',author=jid).join(jid,message.arg.strip())
+		
+	# Umożliwia wypisanie / usunięcie pokoju (/leave roomName)
+	def leave_command(self, message=None):
+		jid = message.sender.split('/')[0]
+		if Roster.check_jid(jid) == False:
+			return False
+		Rooms(name='Rooms',author=jid).leave(jid,message.arg.strip())
+
+	# Wyświetla wszystkich użytkowników z podziałem na status: Online / Offline
+	def online_command(self, message=None):
+		jid = message.sender.split('/')[0]
+		if Roster.check_jid(jid) == False:
+			return False
+		p = PresenceStatus.all()
+		p = p.fetch(settings.BROADCAST_USERS_LIMIT)
+		if len(p) == 0:
+			message.reply("Brak danych o użytkownikach")
 		else:
-			if info == 'jutro':
-				message.reply('Jutro na obiad: %s' % (items[0].name))
-			else:
-				message.reply('Dzisiaj na obiad: %s' % (items[0].name))
-	
+			reply = 'Online:\n'
+			offline = []
+			for item in p:
+				if item.online:
+					reply+=item.name+'\n'
+				else:
+					offline.append({'name':item.name,'dt': item.last.strftime("%Y-%m-%d %H:%I:%S") })
+			if len(p) == len(offline):
+				reply+='brak\n'
+			reply+='\nOffline:\n'
+			if len(offline):
+				for item in offline:
+					reply+=item['name']+' ('+item['dt']+')\n'
+			message.reply(reply)
+
 	def info_command(self, message=None):
 		jid = message.sender.split('/')[0]
 		if Roster.check_jid(jid) == False:
 			return False
 		info = message.arg.strip().replace("\r"," ")
 		info = re.sub('\n',' ',info)
-		logging.info('INFO: %s from %s' % (info,jid))
 		if(len(info) <= 1):
 			message.reply('Wpisz dłuższą wiadomość (minimum to 2 znaki).')
 			return False
@@ -80,6 +125,13 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 				message.reply('Informacje od użytkowników systemu nie będą już więcej wysyłane do Ciebie. Zawsze możesz to zmienić wpisująć /info on')
 			return True
 		
+		# Sprawdz na jakim pokoju pisze user
+		currentRoom = DbSettings.get(jid,"currentRoom")
+		if currentRoom != None and currentRoom != "global":
+			if self.send_to_room(message,currentRoom):
+				message.reply(u"Wiadomość została wysłana do pokoju [%s]" % (currentRoom))
+			return True
+
 		r = Roster.all()
 		r.filter("jid !=",jid)
 		r.filter("infoCmd =",True)
@@ -95,7 +147,7 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 			mes = InfoMessages(jid=jid,message=info)
 			mes.put()
 		except:
-			message.reply('Hurray! BOT exceeded quota limit. Thx You :)');
+			message.reply('Hurray! BOT exceeded quota limit. Thx You :)	');
 	
 	def sync_command(self, message=None):
 		jid = message.sender.split('/')[0]
