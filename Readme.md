@@ -3,32 +3,32 @@ Kitekbot
 
 Kitekbot jest botem XMPP stworzonym w Pythonie i opartym o Google App Engine.
 * * *
-Obecnie bot obs≥uguje nastÍpujπce funkcje / komendy:
+Obecnie bot obs≈Çuguje nastƒôpujƒÖce funkcje / komendy:
 
-- **/help** - wyúwietla dostÍpne komendy wraz z krÛtkim opisem
-- **/info** *wiadomoúÊ* - wysy≥a wiadomoúÊ do wszystkich uøytkownikÛw
-- **/sync** *plik1 plik2* - wysy≥a wiadomoúÊ o synchronizowanych plikach i oczekuje na odpowiedü
-- **/sync** *on|off* - w≥/wy≥ otrzymywanie informacji o synchronizowanych plikach
-- **/online** - wyúwietla wszystkich uøytkownikÛw wraz ich statusami
-- **/join** *nazwaPokoju* - tworzy i subskrybuje podany pokÛj
-- **/leave** *nazwaPokoju* - opuszcza wybrany pokÛj
-- **/rooms** - wyúwietla listÍ wszystkich dostÍpnych pokoi
-- **/rooms** *nazwaPokoju* - wyúwietla informacje o wybranym pokoju
-- **/invite** *user nazwaPokoju* - zaprasza uøytkownika do wybranego pokoju
-- **/switch** *nazwaPokoju* - umoøliwia prze≥πczanie siÍ pomiÍdzy pokojami
+- **/help** - wy≈õwietla dostƒôpne komendy wraz z kr√≥tkim opisem
+- **/info** *wiadomo≈õƒá* - wysy≈Ça wiadomo≈õƒá do wszystkich u≈ºytkownik√≥w
+- **/sync** *plik1 plik2* - wysy≈Ça wiadomo≈õƒá o synchronizowanych plikach i oczekuje na odpowied≈∫
+- **/sync** *on|off* - w≈Ç/wy≈Ç otrzymywanie informacji o synchronizowanych plikach
+- **/online** - wy≈õwietla wszystkich u≈ºytkownik√≥w wraz ich statusami
+- **/join** *nazwaPokoju* - tworzy i subskrybuje podany pok√≥j
+- **/leave** *nazwaPokoju* - opuszcza wybrany pok√≥j
+- **/rooms** - wy≈õwietla listƒô wszystkich dostƒôpnych pokoi
+- **/rooms** *nazwaPokoju* - wy≈õwietla informacje o wybranym pokoju
+- **/invite** *user nazwaPokoju* - zaprasza u≈ºytkownika do wybranego pokoju
+- **/switch** *nazwaPokoju* - umo≈ºliwia prze≈ÇƒÖczanie siƒô pomiƒôdzy pokojami
 
-### Przesy≥anie wiadomoúci ######
-Pisanie wiadomoúci do wszystkich uøytkownikÛw moøliwe jest na dwa sposoby: 
+### Przesy≈Çanie wiadomo≈õci ######
+Pisanie wiadomo≈õci do wszystkich u≈ºytkownik√≥w mo≈ºliwe jest na dwa sposoby: 
 
-- napisanie wiadomoúci bez øadnej komendy
-- uøycie komendy /info
+- napisanie wiadomo≈õci bez ≈ºadnej komendy
+- u≈ºycie komendy /info
 
-Pisanie wiadomoúci w konkretnym pokoju moøliwe jest poprzez:
+Pisanie wiadomo≈õci w konkretnym pokoju mo≈ºliwe jest poprzez:
 
-- podawanie na poczπtku wiadomoúci *#nazwaPokoju* np.: *#tech Jest tam ktoú?* wyúle wiadomoúÊ do pokoju o nazwie *tech* (oczywiúcie wymagana jest wczeúniejsza subskrypcja)
-- wczeúniejsze prze≥πczenie siÍ do pokoju i wys≥anie wiadomoúci bez øadnych parametrÛw np: 
+- podawanie na poczƒÖtku wiadomo≈õci *#nazwaPokoju* np.: *#tech Jest tam kto≈õ?* wy≈õle wiadomo≈õƒá do pokoju o nazwie *tech* (oczywi≈õcie wymagana jest wcze≈õniejsza subskrypcja)
+- wcze≈õniejsze prze≈ÇƒÖczenie siƒô do pokoju i wys≈Çanie wiadomo≈õci bez ≈ºadnych parametr√≥w np: 
 
 > */switch tech*
 >
-> Jest tam ktoú?
+> Jest tam kto≈õ?
 
