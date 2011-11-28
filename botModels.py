@@ -317,6 +317,7 @@ class Rooms(NamedModel):
 			xmpp.send_message(jid,u"Nie możesz pisać w tym pokoju ponieważ nie posiadasz aktywnej subskrypcji. Wpisz /join %s by dołączyć do pokoju." % (roomName))
 			return False
 		if len(to):
+			xmpp.send_message(jid,u"Wiadomość została wysłana do pokoju '%s'." % (roomName))
 			xmpp.send_message(to,u"[%s] %s: %s" % (roomName, re.sub(r'([\w\.-]+)@([\w\.-]+)', r'\1',jid),info))
 		else:
 			xmpp.send_message(jid,u"Brak osób w pokoju o nazwie: '%s'. Listę dostępnych pokoi uzyskasz wpisując /rooms" % (roomName))

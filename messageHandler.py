@@ -128,8 +128,7 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 		# Sprawdz na jakim pokoju pisze user
 		currentRoom = DbSettings.get(jid,"currentRoom")
 		if currentRoom != None and currentRoom != "global":
-			if self.send_to_room(message,currentRoom):
-				message.reply(u"Wiadomość została wysłana do pokoju [%s]" % (currentRoom))
+			self.send_to_room(message,currentRoom)
 			return True
 
 		r = Roster.all()

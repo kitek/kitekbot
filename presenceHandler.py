@@ -12,8 +12,6 @@ class AvailableHandler(webapp.RequestHandler):
 		jid = self.request.get('from').split('/')[0]
 		if Roster.check_jid(jid) == False:
 			return False
-		console.info('STATUS: Available from %s ' % (jid))
-
 		presence = PresenceStatus(name=jid)
 		presence.put()
 		
@@ -22,8 +20,6 @@ class UnavailableHandler(webapp.RequestHandler):
 		jid = self.request.get('from').split('/')[0]
 		if Roster.check_jid(jid) == False:
 			return False
-		console.info('STATUS: Unavailable from %s ' % (jid))
-
 		presence = PresenceStatus(name=jid,online=False)
 		presence.put()
 		
