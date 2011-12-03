@@ -90,6 +90,7 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 			reply = 'Online:\n'
 			offline = []
 			for item in p:
+				item.name = item.name.replace("@"+settings.ALLOWED_DOMAIN,"")
 				if item.online:
 					reply+=item.name+'\n'
 				else:
