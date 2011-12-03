@@ -33,7 +33,11 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 		info = message.arg.strip().replace("\r","")
 		info = re.sub('\n','',info)
 		params = info.split(' ');
-		Rooms(name='Rooms',author=jid).invite(jid,params[0],params[1])
+		try:
+			Rooms(name='Rooms',author=jid).invite(jid,params[0],params[1])	
+		except IndexError:
+			message.reply(u'Poprawna składnia to /invite kto nazwaPokoju')
+		
 	
 	# /switch piwo
 	def switch_command(self, message=None):
