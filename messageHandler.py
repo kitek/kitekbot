@@ -310,7 +310,7 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 			jids = []
 			for item in items:
 				jids.append(item.jid)
-			msg = u'SYNC: *%s*\nPowyższe pliki zostaną synchronizowane przez %s. Czy wyrażasz na to zgodę? Odpowiedz: /sync tak|ok|yes jeżeli nie masz nic przeciwko lub /sync nie|no jeżeli synchronizacja ma zostać przerwana.'
+			msg = u'SYNC: %s\nPowyższe pliki zostaną synchronizowane przez %s. Czy wyrażasz na to zgodę? Odpowiedz: /sync tak|ok|yes jeżeli nie masz nic przeciwko lub /sync nie|no jeżeli synchronizacja ma zostać przerwana.'
 			xmpp.send_message(jids,msg % (pliki,jid),None,xmpp.MESSAGE_TYPE_CHAT)
 
 	def help_command(self, message=None):
