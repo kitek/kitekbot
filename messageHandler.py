@@ -81,7 +81,7 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 			return False
 		Rooms(name='Rooms',author=jid).leave(jid,message.arg.strip())
 
-	# Wyświetla wszystkich użytkowników z podziałem na status: Online / Offline
+	# Wyświetla użytkowników ktorzy sa online
 	def online_command(self, message=None):
 		jid = message.sender.split('/')[0]
 		if Roster.check_jid(jid) == False:
@@ -91,20 +91,42 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 		if len(p) == 0:
 			message.reply("Brak danych o użytkownikach")
 		else:
-			reply = 'Online:\n'
-			offline = []
+			reply = 'Online [$ile/$all]:\n'
+			ile = 0
+			all = 0
 			for item in p:
-				item.name = item.name.replace("@"+settings.ALLOWED_DOMAIN,"")
 				if item.online:
+					item.name = item.name.replace("@"+settings.ALLOWED_DOMAIN,"").replace('.',' ').title()
 					reply+=item.name+'\n'
-				else:
-					offline.append({'name':item.name,'dt': item.last.strftime("%Y-%m-%d %H:%I:%S") })
-			if len(p) == len(offline):
+					ile = ile + 1
+				all = all + 1
+			if ile == 0:
 				reply+='brak\n'
-			reply+='\nOffline:\n'
-			if len(offline):
-				for item in offline:
-					reply+=item['name']+' ('+item['dt']+')\n'
+			reply = reply.replace('$ile', str(ile)).replace('$all', str(all))
+			message.reply(reply)
+
+	# Wyświetla użytkowników ktorzy sa offline + daty kiedy ostatni raz byli online
+	def offline_command(self, message=None):
+		jid = message.sender.split('/')[0]
+		if Roster.check_jid(jid) == False:
+			return False
+		p = PresenceStatus.all()
+		p = p.fetch(settings.BROADCAST_USERS_LIMIT)
+		if len(p) == 0:
+			message.reply("Brak danych o użytkownikach")
+		else:
+			reply='\nOffline [$ile/$all]:\n'
+			ile = 0
+			all = 0
+			for item in p:
+				if item.online == False:
+					item.name = item.name.replace("@"+settings.ALLOWED_DOMAIN,"").replace('.',' ').title()
+					reply+=item.name+' ('+item.last.strftime("%Y-%m-%d %H:%I:%S")+')\n'
+					ile = ile + 1
+				all = all + 1
+			if ile == 0:
+				reply+='brak\n'
+			reply = reply.replace('$ile', str(ile)).replace('$all', str(all))
 			message.reply(reply)
 
 	def info_command(self, message=None):
