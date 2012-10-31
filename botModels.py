@@ -7,6 +7,7 @@ from google.appengine.api import memcache
 import random, settings, re
 import logging as console
 
+
 # Utilities models
 class Acl():
 	GUEST = 0x0
