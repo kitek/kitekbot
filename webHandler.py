@@ -1,14 +1,20 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-__version__ = '0.1'
 
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.api import xmpp, datastore_errors
 from datetime import datetime
-from botModels import Acl,Roster,LogsLogin,Sync,SyncAnswers,GeneralCounterShard,Solution
-import logging, md5
+from botModels import Acl,Roster,LogsLogin,Sync,InfoMessages
+import logging
+import md5
+import re
+import time
+import json
 from utilities.web import Controller
+from utilities.web import parseDateTime
+from datetime import timedelta, date
+
 
 
 """
@@ -17,8 +23,11 @@ URL: /login
 """
 class LoginHandler(Controller):
 	_acl = Acl.GUEST
+	_title = 'Logowanie'
+	_menu_ac = 'index'
 	
-	def _get(self):
+	# greeting.content|escape
+	def _get(self, params):
 		self.view['info'] = ''
 		if self._is_logged:
 			super(Controller, self).redirect('/')
@@ -32,28 +41,6 @@ class LoginHandler(Controller):
 					self.view['info'] = 'Błędny login lub hasło.'
 			except datastore_errors.BadKeyError:
 				self.view['info'] = 'Błędny login lub hasło.'
-		
-		
-	def _post(self):
-		if(self.request.get('login') and self.request.get('pass')):
-			user = Roster.findByJid(self.request.get('login'))
-			
-			#user.password = md5.new(self.request.get('pass')).hexdigest()
-			#user.acl = Acl.ADMIN
-			#user.put()
-						
-			if user != None and user.password == md5.new(self.request.get('pass')).hexdigest():
-				self.session['auth'] = {
-					'jid' : user.jid,
-					'password' : user.password,
-					'acl' : user.acl
-				}
-				log = LogsLogin(userRef=user)
-				log.put()
-				super(Controller, self).redirect('/')
-			else:
-				self.view['info'] = 'Błędny login lub hasło.'
-	
 	def __init_session(self,user):
 		self.session['auth'] = {
 			'jid' : user.jid,
@@ -69,7 +56,7 @@ URL: /logout
 """
 class LogoutHandler(Controller):
 	_acl = Acl.GUEST
-	def _get(self):
+	def _get(self, params):
 		self.set_no_render(True)
 		if self._is_logged:
 			self.session.delete()
@@ -77,6 +64,78 @@ class LogoutHandler(Controller):
 	def _post(self):
 		self._get()
 
+class ChatsHandler(Controller):
+	_acl = Acl.MEMBER
+	_title = 'Historia rozmów'
+	_menu_ac = 'chats'
+	_js = ['underscore.js','backbone.js','chats.js']
+	_css = ['chats.css']
+	def _get(self, params):
+		# Default 
+		dt = date.today()
+		page = 0
+		limit = 100
+		items = []
+		button_ac = 'dzis'
+		frame = {}
+
+		# Params in URL
+		if len(params) > 0:
+			dt = params[0].lower()
+			page = int(params[1]) if (params[1] != None and int(params[1]) > 0) else 0
+			if (dt == 'wczoraj'):
+				dt = date.today() - timedelta(1)
+				button_ac = 'wczoraj'
+			elif None != re.match('(\d{4}\-\d{2}\-\d{2})',dt):
+				dt = parseDateTime(dt)
+				button_ac = 'dzien'
+			else:
+				dt = date.today()
+
+		startDate = parseDateTime(str(dt)+' 00:00:00')
+		endDate = parseDateTime(str(dt)+' 23:59:59')
+
+		chats = InfoMessages.all()
+		chats.filter('created >=', startDate)
+		chats.filter('created <=', endDate)
+		chats.order("-created")
+		chats = chats.fetch(limit, limit*page)
+
+		for chat in chats:
+			if len(frame) == 0:
+				frame = {'author':chat.jid,'messages':[]}
+			if frame['author'] == chat.jid:
+				frame['messages'].append({'body':chat.message,'time':chat.created.strftime('%Y-%m-%d %H:%M')})
+			else:
+				items.append(frame)
+				frame = {'author':chat.jid,'messages':[]}
+				frame['messages'].append({'body':chat.message,'time':chat.created.strftime('%Y-%m-%d %H:%M')})
+		if len(frame) > 0:
+			items.append(frame)
+			frame = {}
+		if self.request.get('ajax',False):
+			self.set_no_render(True)
+			self.response.out.write(json.dumps(items))
+		else:
+			self.view['chats'] = json.dumps(items)
+			self.view['button_ac'] = button_ac
+
+"""
+Strona główna
+URL: /
+"""
+class IndexHandler(Controller):
+	_title = 'Dashboard'
+	_template = 'index'
+	_menu_ac = 'index'
+
+	def _get(self, params):
+		pass
+	def _post(self):
+		pass
+
+
+"""
 class SyncHandler(Controller):
 	_acl = Acl.MEMBER
 	_title = 'Ostatnio przeprowadzone synchronizacje'
@@ -193,12 +252,4 @@ class SolutionsAddHandler(Controller):
 		
 		self._post = {'title':title,'body':body,'language':language}
 		return len(self.view['errors']) == 0
-
-class WebHandler(Controller):
-	_template = 'index'
-	def _get(self):
-		
-		pass
-		
-	def _post(self):
-		pass
+"""

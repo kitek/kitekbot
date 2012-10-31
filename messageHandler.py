@@ -7,6 +7,7 @@ from google.appengine.ext.webapp import xmpp_handlers
 from datetime import datetime
 from botModels import Version, Sync, Roster, SyncAnswers, InfoMessages, PresenceStatus, RoomSubscriptions, Rooms, DbSettings
 import logging, re, time, datetime, settings, re
+import hashlib
 
 class MessageHandler(xmpp_handlers.CommandHandler):
 	
@@ -358,10 +359,17 @@ class MessageHandler(xmpp_handlers.CommandHandler):
 		gui_hash = ''
 		user = Roster.findByJid(jid)
 		if(user != None):
+			if user.password == None or user.password == Null:
+				# Generate password
+				m = hashlib.md5()
+				m.update("Nobody inspects")
+				#logging.info(str(m.digest()))
+				
 			gui_hash = str(user.key())
-		
-		message.reply("Devel ver. %s\nLista dostępnych poleceń:\n%s\n\nLink do webGUI: %s" % (Version.getMajorVersion(), cmd, settings.WEBGUI_URL+gui_hash))
+		logging.info('xxx')
+		#message.reply("Devel ver. %s\nLista dostępnych poleceń:\n%s\n\nLink do webGUI: %s" % (Version.getMajorVersion(), cmd, settings.WEBGUI_URL+gui_hash))
 		return True
+	
 	def _checkSyncTime(self,item):
 		t = datetime.datetime(*time.strptime(str(item.created).split('.')[0],"%Y-%m-%d %H:%M:%S")[0:5])
 		difference = datetime.datetime.now() - t

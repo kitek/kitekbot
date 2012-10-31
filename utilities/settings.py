@@ -15,7 +15,9 @@ default_acl_restriction = Acl.MEMBER # Domyślna wymagana rola ACL
 login_url = '/login' # URL do strony z logowaniem
 
 css_url = '/css/'
-css_include = ['main.css']
+css_include = ['main.css','bootstrap.css','bootstrap-responsive.css']
+js_include = ['jquery.js']
+title_default = '%s - Kitekbot'
 
 # Configuration settings for the session class.
 session = {    
@@ -65,5 +67,5 @@ rotmodel = {
     "RETRY_INTERVAL": .2,
 }
 if __name__ == "__main__":
-    print "Hello World";
+    pass
 

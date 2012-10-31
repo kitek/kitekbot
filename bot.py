@@ -25,13 +25,16 @@ __version__ = "1.0"
 def main():
 	app = webapp.WSGIApplication([
 		# Web
-		('/', webHandler.WebHandler),
+		('/', webHandler.IndexHandler),
 		(r'/login/?', webHandler.LoginHandler),
 		(r'/logout/?', webHandler.LogoutHandler),
-		(r'/sync/?', webHandler.SyncHandler),
-		(r'/solutions/?', webHandler.SolutionsHandler),
-		(r'/solutions/[0-9]+', webHandler.SolutionHandler),
-		(r'/solutions/add/?', webHandler.SolutionsAddHandler),
+		(r'/chats/?', webHandler.ChatsHandler),
+		(r'/chats/([a-z0-9\-]+)/?(\d+)?', webHandler.ChatsHandler),
+		#(r'/sync/?', webHandler.SyncHandler),
+
+		#(r'/solutions/?', webHandler.SolutionsHandler),
+		#(r'/solutions/[0-9]+', webHandler.SolutionHandler),
+		#(r'/solutions/add/?', webHandler.SolutionsAddHandler),
 		
 		# XMPP
 		('/_ah/xmpp/message/chat/', messageHandler.MessageHandler),

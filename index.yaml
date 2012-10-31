@@ -32,8 +32,8 @@ indexes:
   - name: jid
   - name: __key__
     direction: desc
-    
-- kind: Solution
+
+- kind: InfoMessages
   properties:
-  - name: __key__
+  - name: created
     direction: desc

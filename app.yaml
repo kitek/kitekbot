@@ -23,6 +23,14 @@ handlers:
 - url: /img/(.*\.(png|gif|jpg))
   static_files: static/images/\1
   upload: static/images/(.*\.(png|gif|jpg))
+
+- url: /img/chats/(.*\.(png|gif|jpg))
+  static_files: static/images/chats/\1
+  upload: static/images/chats/(.*\.(png|gif|jpg))
+
+- url: /js/(.*\.js)
+  static_files: static/js/\1
+  upload: static/js/(.*\.js)
   
 - url: /.*
   script: bot.py

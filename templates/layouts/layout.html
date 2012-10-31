@@ -1,26 +1,54 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"> 
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pl">
-	<head>
-		<meta http-equiv="Content-type" content="text/html; charset=utf-8" /> 
-    	<meta http-equiv="Content-Language" content="pl" />
-    	<title>{{ title }}</title> 
-    	{% for css in template_css %}
-    		<link href="/css/{{css}}" rel="stylesheet" type="text/css" media="screen" /> 
-    	{% endfor %}
-	</head>
-	<body>
-		<div class="LayoutGrid">
-			<div class="sitenav">
-				<div id="SiteHeader">
-					<div class="SiteHeaderBar">
-						<a href="/sync" class="SiteHeaderBarItem SiteHeaderBarLink">Sync</a>
-						<a href="/solutions" class="SiteHeaderBarItem SiteHeaderBarLink">Solutions</a>
-						<div style="clear:both;"></div>
-					</div>
-				</div>
-			</div><div style="clear:both;"></div>
-			{% include template_name %}
-			<div style="clear:both;"></div>
-		</div>
-	</body>
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" /> 
+    <meta http-equiv="Content-Language" content="pl" />
+    <title>{{ title }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+	{% for css in template_css %}
+    	<link href="/css/{{css}}" rel="stylesheet" type="text/css" media="screen" /> 
+   	{% endfor %}
+    <style>body {padding-top: 60px;}</style>
+    <!--[if lt IE 9]><script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+    <link rel="shortcut icon" href="img/favicon.ico">
+  </head>
+  <body>
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="/">Kitekbot</a>
+          <div class="nav-collapse">
+            <ul class="nav">
+            	{% if auth %}
+            		<li {% ifequal menu_ac "chats" %} class="active"{% endifequal %}><a href="/chats">Rozmowy</a></li>
+            	{% endif %}
+            </ul>
+            {% if auth %}
+            <ul class="nav pull-right">
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Kitowicz Marcin <b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                		<li><a href="#">Ustawienia</a></li>
+                		<li class="divider"></li>
+                		<li><a href="/logout">Wyloguj</a></li>
+              	</ul>
+				      </li>
+            </ul>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container">{% include template_name %}</div>
+    {% for js in template_js %}
+    	<script src="/js/{{js}}"></script>
+   	{% endfor %}
+  </body>
 </html>

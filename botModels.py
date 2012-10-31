@@ -376,6 +376,7 @@ class InfoMessages(db.Model):
 	jid = db.StringProperty(required=True)
 	created = db.DateTimeProperty(auto_now_add=True)
 	message = db.TextProperty(required=True)
+	room = db.StringProperty(required=True,default='global')
 	
 class Sync(db.Model):
 	jid = db.StringProperty(required=True)
