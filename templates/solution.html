@@ -1,9 +1,0 @@
-{% if solution %}
-	<h1>{{ solution.title|escape }}</h1>
-	<textarea cols="60" rows="20">{{ solution.body|escape }}</textarea><br />
-	Język: {{ solution.language }}<br />
-	Autor: {{ solution.jid }}<br />
-	Utworzone: {{ solution.created|date:"Y-m-d H:i" }}
-{% else %}
-	<h1>Nie znaleziono solucji.</h1>
-{% endif %}

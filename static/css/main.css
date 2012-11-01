@@ -1,15 +1,1 @@
-.mini {
-	min-height: 18px !important;
-	padding: 10px !important;
-	margin-bottom: 7px !important;
-	display: inline-block;
-}
-.mini span {
-	font-weight:bold;
-}
-.mini .dt {
-	display: none;
-	text-align:right;
-	font-size:10px;
-	color:#999;
-}
+#content { margin: 20px;}

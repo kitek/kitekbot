@@ -1,43 +1,32 @@
-application: kitekbot
+application: kitekbot27
 version: 1
-runtime: python
+runtime: python27
 api_version: 1
-
-builtins:
-- datastore_admin: on
+threadsafe: true
 
 handlers:
-- url: /cron/.*
-  script: bot.py
-  login: admin
-
 - url: /favicon\.ico
   static_files: static/images/favicon.ico
-  mime_type: vnd.microsoft.icon
   upload: static/images/favicon\.ico
-
-- url: /css/(.*\.css)
-  static_files: static/css/\1
-  upload: static/css/(.*\.css)
-  
-- url: /img/(.*\.(png|gif|jpg))
-  static_files: static/images/\1
-  upload: static/images/(.*\.(png|gif|jpg))
-
-- url: /img/chats/(.*\.(png|gif|jpg))
-  static_files: static/images/chats/\1
-  upload: static/images/chats/(.*\.(png|gif|jpg))
-
+  mime_type: vnd.microsoft.icon
 - url: /js/(.*\.js)
   static_files: static/js/\1
   upload: static/js/(.*\.js)
-  
+- url: /css/(.*\.css)
+  static_files: static/css/\1
+  upload: static/css/(.*\.css)
+- url: /img/(.*\.png)
+  static_files: static/images/\1
+  upload: static/images/(.*\.png)
 - url: /.*
-  script: bot.py
+  script: main.app
+
+libraries:
+- name: webapp2
+  version: "latest"
+- name: jinja2
+  version: "latest"
 
 
 inbound_services:
-- xmpp_message
 - xmpp_subscribe
-- xmpp_presence
-- warmup
