@@ -19,7 +19,7 @@ class XmppHandler(webapp2.RequestHandler):
 	jid = ''
 	jidName = ''
 	handlerName = ''
-	data = {'user':False}
+	data = {'user':False,'body':''}
 
 	def dispatch(self):
 		self.jid = self.request.get('from').split('/')[0]
@@ -44,6 +44,10 @@ class XmppHandler(webapp2.RequestHandler):
 				self.sendUnavailable()
 				self.abort(403)
 				return
+		# Wyrożniamy trzy typy wiadomosci (command, message, roomMessage)
+		if 'message' == self.handlerName and self.request.get('body'):
+			self.data['body'] = self.request.get('body').strip()
+
 		try:
 			# Dispatch the request.
 			webapp2.RequestHandler.dispatch(self)

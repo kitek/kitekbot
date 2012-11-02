@@ -3,19 +3,29 @@
 
 import os
 import logging
+import datetime
 from google.appengine.ext import db
 from Base import BaseController
 from models.Users import Users
 from models.UsersInvited import UsersInvited
 from models.UsersSettings import UsersSettings
+from library.XmppCommand import CommandDispatcher
+
+
+
 
 class DebugController(BaseController):
 	title = 'Debug - Kitekbot'
 
 	def get(self):
+		#CommandDispatcher.register('online',comamndClass)
+		#CommandDispatcher.register('offline',comamndClass2)
+
 
 		#jid = ''
 		#user = Users.getByJid(jid)
+		#user.lastOnline = datetime.datetime.now()
+		#user.put()
 		#user = Users.get_by_key_name(jid)
 		#logging.info(user.settings[0].name)
 
