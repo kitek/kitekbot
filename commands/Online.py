@@ -1,41 +1,28 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
-"""
-- ładowanie wszystkich plików modułu tylko w przypadku dispatch'owania polecenia
-	przy zwykłych wiadomościach nie ma sensu tego odpalać
-
-- definicja ciała komendy
-	- dostęp do modelu użytkownika
-	- dostęp do parametrów polecenia
-- uprawnienia użytkownika do wykonania polecenia (default=user)
-- krótki opis komendy
-- pomoc komendy (ewentualnie przykład)
-- możliwość zarejestrowania komendy w systemie (ewentualne aliasy)
-
-
-import BaseCommand
-
-class Online(object):
-	det costam(self):
-		wynik = 2 * 2
-
-
-/online 5
-/sleep 10
-
-
-BaseCommand.registerCommand('online',callback)
-
-"""
-
 import logging
+import re
+from models.Users import Users
+from library.Message import Message
 from library.XmppCommand import Command
 from library.XmppCommand import CommandDispatcher
 
 class Online(Command):
+	description = 'Wyświetla listę z użytkownikami online.'
+	help = 'Wyświetla listę z użytkownikami online.'
 	def run(self, user, params):
-		logging.info('executing Online.run()')
-		logging.info('online from: %s' % (user.jid))
+		# Zapytanie o użytkowników online
+		response = 'Osoby online [%s/%s]:\n'
+		onlineCount = 0
+		allUsers = Users.getAll(user.jid)
+		for item in allUsers:
+			if None == item.lastOnline:
+				response+=re.sub(r'([\w\.-]+)@([\w\.-]+)', r'\1',item.jid)+'\n'
+				onlineCount+=1
+		response = response % (onlineCount,len(allUsers))
+		if 0 == onlineCount:
+			response+='brak osób'
+		Message.reply(response)
 
 CommandDispatcher.register('online', Online)
