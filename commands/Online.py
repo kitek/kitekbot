@@ -30,10 +30,12 @@ BaseCommand.registerCommand('online',callback)
 """
 
 import logging
+from library.XmppCommand import Command
 from library.XmppCommand import CommandDispatcher
 
-class Online:
+class Online(Command):
 	def run(self, user, params):
 		logging.info('executing Online.run()')
+		logging.info('online from: %s' % (user.jid))
 
 CommandDispatcher.register('online', Online)

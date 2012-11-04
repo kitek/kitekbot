@@ -22,9 +22,23 @@ class DebugController(BaseController):
 		#CommandDispatcher.register('offline',comamndClass2)
 
 
-		#jid = ''
+		jid = 'tomek@o2.pl'
 		#user = Users.getByJid(jid)
 		#user.lastOnline = datetime.datetime.now()
+		#user.put()
+
+		#globalChat = UsersSettings.get(jid, 'globalChat')
+		#logging.info(globalChat)
+
+		settings = UsersSettings.set(jid,'offlineChat','disabled')
+		
+
+		
+
+		#user.settings
+
+		#user = Users(key_name=jid)
+		#user.currentRoom = 'global'
 		#user.put()
 		#user = Users.get_by_key_name(jid)
 		#logging.info(user.settings[0].name)
