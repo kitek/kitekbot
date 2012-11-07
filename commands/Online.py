@@ -8,7 +8,7 @@ from library.Message import Message
 from library.XmppCommand import Command
 from library.XmppCommand import CommandDispatcher
 
-class Online(Command):
+class OnlineCommand(Command):
 	description = 'Wyświetla listę z użytkownikami online.'
 	help = 'Wyświetla listę z użytkownikami online.'
 	def run(self, user, params):
@@ -25,4 +25,4 @@ class Online(Command):
 			response+='brak osób'
 		Message.reply(response)
 
-CommandDispatcher.register('online', Online)
+CommandDispatcher.register('online', OnlineCommand)

@@ -61,10 +61,10 @@ class Message(object):
 	@staticmethod
 	def reply(body):
 		""" Wysyła odpowiedź zwrotną do użytkownika (jednego). """
-		return Message.send(Message.user.jid, body)
+		return Message.send(Message.user.jid, body, recordChat = False)
 
 	@staticmethod
-	def send(jids, body, roomName = 'global'):
+	def send(jids, body, roomName = 'global', recordChat = True):
 		body = Message.format(body)
 		if False == Message.isValid(body):
 			Message.reply('Wpisz dłuższą wiadomość.')
@@ -72,12 +72,13 @@ class Message(object):
 		# Wyślij wiadomości
 		SentResult = xmpp.send_message(jids, u'%s: %s' % (re.sub(r'([\w\.-]+)@([\w\.-]+)', r'\1',Message.user.jid),body))
 		# Zapisz infomacje w bazie
-		try:
-			Chats(body=body,jid=Message.user.jid,message=body,roomName=roomName).put()
-		except:
-			logging.error('Error while inserting message: "%s"' % (body))
+		if True == recordChat:
+			try:
+				Chats(body=body,jid=Message.user.jid,message=body,roomName=roomName).put()
+			except:
+				logging.error('Error while inserting message: "%s"' % (body))
 		if SentResult != xmpp.NO_ERROR:
-			logging.error('Error while sending message: "%s" to %s' % (body, Message.user.jid))
+			logging.error('Error while sending message: "%s" from %s' % (body, Message.user.jid))
 			return False
 		return True
 

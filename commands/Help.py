@@ -6,8 +6,8 @@ from library.XmppCommand import Command
 from library.XmppCommand import CommandDispatcher
 from library.Message import Message
 
-class Help(Command):
+class HelpCommand(Command):
 	def run(self, user, params):
 		Message.reply('Oto pomoc')
 
-CommandDispatcher.register('help', Help)
+CommandDispatcher.register('help', HelpCommand)
