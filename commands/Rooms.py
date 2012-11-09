@@ -7,6 +7,7 @@ from library.Message import Message
 from library.XmppCommand import Command
 from library.XmppCommand import CommandDispatcher
 from models.Rooms import Rooms
+from models.Sequence import *
 from models.RoomSubscriptions import RoomSubscriptions
 
 class RoomsCommand(Command):
@@ -35,9 +36,9 @@ class RoomsCommand(Command):
 							ext = u"osoby"
 						if room.count > 4:
 							ext = u"osób"
-						response+="* "+room.name+" ("+("Ja + " if mySubs.has_key(room.name) else "")+str(room.count)+" "+ext+")\n"
+						response+="* #"+room.name+" (Id: %s) - "+("Ja + " if mySubs.has_key(room.name) else "")+str(room.count)+" "+ext+"\n" % (room.seqId)
 					else:
-						response+="* "+room.name+" (tylko Ja)\n"
+						response+="* #"+room.name+" (Id: %s) - tylko Ja\n" % (room.seqId)
 			Message.reply(response)
 		else:
 			# Wyswietl o podanej nazwie
@@ -69,11 +70,21 @@ class JoinCommand(Command):
 		mySubName = '%s/%s' % (roomName, user.jid)
 		myRoomSubscriptions = RoomSubscriptions.get_by_key_name(mySubName)
 		if None != myRoomSubscriptions:
-			Message.reply(u"Posiadasz już subskrypcję w tym pokoju. Zawsze możesz opuścić pokój wpisując /leave %s" % (roomName))
+			Message.reply(u"Posiadasz już subskrypcję w tym pokoju. Zawsze możesz opuścić pokój wpisując '/leave %s'." % (roomName))
 			return False
 		room = Rooms.get_by_key_name(roomName)
 		if None == room:
-			Rooms(key_name=roomName, name=roomName, authorJid=user.jid).put()
+			# Pobierz kolejny numer z sekwencji i wpisz do kolekcji
+			seqName = 'rooms'
+			currentSeq = None
+			try:
+				currentSeq = get_numbers(seqName, 1)[0]
+			except Exception, e:
+				# Utworz nowa sekwencje jezeli jej nie ma
+				init_sequence(seqName, start=1, end=0xffffffff)
+				currentSeq = get_numbers(seqName, 1)[0]
+
+			Rooms(key_name=roomName, name=roomName, authorJid=user.jid, seqId=currentSeq).put()
 		else:
 			room.count = room.count + 1
 			room.put()
@@ -81,8 +92,9 @@ class JoinCommand(Command):
 			Message.broadcast(u"[%s] %s dołączył do pokoju." % (user.jid, roomName), roomName)
 		RoomSubscriptions(key_name=mySubName, name=roomName, jid=user.jid).put()
 
+		# Wiadomość dla usera
 		response = u"Od tej pory będziesz otrzymywał rozmowy z pokoju '%s', aby wysłać wiadomość do osób w tym pokoju wpisz: '#%s treść wiadomości'. " % (roomName,roomName)
-		response+= u"Zawsze możesz opuścić pokój wpisując '/leave %s'. Do wyświetlenia osób w pokoju użyj '/rooms %s'" % (roomName,roomName)
+		response+= u"Zawsze możesz opuścić pokój wpisując '/leave %s'. Do wyświetlenia osób w pokoju użyj '/rooms %s'." % (roomName,roomName)
 		Message.reply(response)
 
 

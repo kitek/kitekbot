@@ -12,6 +12,7 @@ class Rooms(db.Model):
 	rejectedNames = ['global']
 
 	name = db.StringProperty(required=True)
+	seqId = db.IntegerProperty(required=True)
 	count = db.IntegerProperty(default=1,required=False)
 	authorJid = db.StringProperty(required=False)
 	created = CetDateTimeProperty(auto_now_add=True)
