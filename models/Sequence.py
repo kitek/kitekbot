@@ -65,10 +65,6 @@ def _init_sequence_helper(typ, start, end, root):
 	logging.info(end)
 	query1 = Sequence.all().ancestor(root).filter('type = ', typ).filter('start >= ', start).filter('start <', end).fetch(1)
 	query2 = Sequence.all().ancestor(root).filter('type = ', typ).filter('end >= ', start).filter('end <', end).fetch(1)
-	
-	logging.info(query1)
-	logging.info(query2)
-
 	if query1 or query2:
 		raise ValueError('%d:%d overlaps with %s/%s' % (start, end, query1, query2))
 	seq = Sequence(type=typ, parent=root, start=start, end=end, active=True)

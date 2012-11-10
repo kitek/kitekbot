@@ -30,7 +30,7 @@ class Message(object):
 		if 'global' == roomName:
 			allUsers = Users.getAll(Message.user.jid)
 			if 0 == len(allUsers):
-				Message.reply('Twoja wiadomość nie może zostać dostarczona. Brak osób, które mogłyby na nią odpowiedzieć.')
+				Message.reply(u"Twoja wiadomość nie może zostać dostarczona. Brak osób, które mogłyby na nią odpowiedzieć.")
 				return False
 			# Budujemy kolekcję odbiorców wiadomości
 			for item in allUsers:
@@ -44,7 +44,7 @@ class Message(object):
 			jidsTo = jidsToCopy.copy()
 			del jidsToCopy
 			if 0 == len(jidsTo):
-				Message.reply('Twoja wiadomość nie może zostać dostarczona. Wszystkie dostępne osoby wyłączyły otrzymywanie wiadomości z czatu globalnego.')
+				Message.reply(u"Twoja wiadomość nie może zostać dostarczona. Wszystkie dostępne osoby wyłączyły otrzymywanie wiadomości z czatu globalnego.")
 				return False
 			# sprawdzamy kto jest offline i czy ma wyłaczone otrzymywanie wiadomości gdy jesteś offline - tych odrzucamy (offlineChat = disabled)
 			jidsToCopy = jidsTo.copy()
@@ -54,7 +54,7 @@ class Message(object):
 			jidsTo = jidsToCopy.copy()
 			del jidsToCopy
 			if 0 == len(jidsTo):
-				Message.reply('Twoja wiadomość nie może zostać dostarczona. Brak osób, które mogłyby na nią odpowiedzieć.')
+				Message.reply(u"Twoja wiadomość nie może zostać dostarczona. Brak osób, które mogłyby na nią odpowiedzieć.")
 				return False
 			Message.send(jidsTo, body, roomName)
 
@@ -67,11 +67,11 @@ class Message(object):
 	def send(jids, body, roomName = 'global', recordChat = True):
 		body = Message.format(body)
 		if False == Message.isValid(body):
-			Message.reply('Wpisz dłuższą wiadomość.')
+			Message.reply(u"Wpisz dłuższą wiadomość.")
 			return False
 		# Wyślij wiadomości
 		# @todo Przy reply nie powinno wysylac mi mojego jid'a bo po co?
-		SentResult = xmpp.send_message(jids, u'%s: %s' % (re.sub(r'([\w\.-]+)@([\w\.-]+)', r'\1',Message.user.jid),body))
+		SentResult = xmpp.send_message(jids, u"%s: %s" % (re.sub(r'([\w\.-]+)@([\w\.-]+)', r'\1',Message.user.jid),body))
 		# Zapisz infomacje w bazie
 		if True == recordChat:
 			try:

@@ -8,8 +8,6 @@ from library.Message import Message
 
 class MessageHandler(XmppHandler):
 	def post(self):
-		logging.info('message: "%s" from %s' % (self.data['body'], self.jid))
-
 		# Rejestruje nadawcę wiadomości w klasie Message (wymagane dla metody reply())
 		Message.user = self.data['user']
 

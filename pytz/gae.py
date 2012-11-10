@@ -76,9 +76,6 @@ class TimezoneLoader(object):
         if zonedata is None:
             zonedata = get_zoneinfo().read('zoneinfo/' + '/'.join(name_parts))
             memcache.add(cache_key, zonedata)
-            logging.info('Added timezone to memcache: %s' % cache_key)
-        else:
-            logging.info('Loaded timezone from memcache: %s' % cache_key)
 
         return StringIO(zonedata)
 

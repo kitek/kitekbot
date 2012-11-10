@@ -30,3 +30,6 @@ libraries:
 
 inbound_services:
 - xmpp_subscribe
+- xmpp_message
+- xmpp_presence
+- warmup
