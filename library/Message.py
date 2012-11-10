@@ -70,6 +70,7 @@ class Message(object):
 			Message.reply('Wpisz dłuższą wiadomość.')
 			return False
 		# Wyślij wiadomości
+		# @todo Przy reply nie powinno wysylac mi mojego jid'a bo po co?
 		SentResult = xmpp.send_message(jids, u'%s: %s' % (re.sub(r'([\w\.-]+)@([\w\.-]+)', r'\1',Message.user.jid),body))
 		# Zapisz infomacje w bazie
 		if True == recordChat:

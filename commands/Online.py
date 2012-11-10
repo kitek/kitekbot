@@ -9,8 +9,8 @@ from library.XmppCommand import Command
 from library.XmppCommand import CommandDispatcher
 
 class OnlineCommand(Command):
-	description = 'Wyświetla listę z użytkownikami online.'
-	help = 'Wyświetla listę z użytkownikami online.'
+	description = u"Lista użytkowników online."
+	help = u"Wyświetla listę z użytkownikami online. Komenda nie posiada parametrów. Zobacz również '/offline'."
 	def run(self, user, params):
 		# Zapytanie o użytkowników online
 		response = 'Osoby online [%s/%s]:\n'

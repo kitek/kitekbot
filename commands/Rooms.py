@@ -13,6 +13,8 @@ from models.RoomSubscriptions import RoomSubscriptions
 class RoomsCommand(Command):
 	""" /rooms [nazwaPokoju]- wyświetla listę wszystkich dostępnych pokoi lub informacje o wybranym """
 	LIMIT = 1000
+	description = u"Lista dostępnych pokoi utworzonych przez użytkowników."
+	help = u"Wyświetla listę wszystkich dostępnych pokoi utworzonych przez użytkowników."
 	def run(self, user, params):
 		if len(params) == 0:
 			# Wyswietl wszystkie dostępne pokoje
@@ -58,6 +60,11 @@ class RoomsCommand(Command):
 
 class JoinCommand(Command):
 	""" /join nazwaPokoju - subskrybuje podany pokój (tworzy w przypadku gdy ten nie istnieje) """
+	description = u"Subskrybuje podany pokój. Jeżeli taki nie istnieje również go tworzy."
+	help = u"Komenda wymaga parametru określającego nazwę pokoju np.: '/join graficy'. " \
+			u"Nazwa pokoju może składac się tylko z liter, cyfr, podkreślników i myślników. " \
+			u"Minimalna długość nazwy pokoju to 3 znaki. Pokój główny ma nazwę 'global' i wszyscy użytkownicy automatycznie " \
+			u"go subskrybują. Zobacz również inne powiązane komendy: '/rooms', '/leave' lub '/invite'."
 	def run(self, user, params):
 		roomName = ''
 		if len(params) > 0:
