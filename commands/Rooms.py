@@ -137,7 +137,7 @@ class SwitchCommand(Command):
 
 class LeaveCommand(Command):
 	description = u"Usuwa subskrypcję z danego pokoju."
-	help = "Umożliwia opuszczenie danego pokoju i zaprzestanie przysyłania z niego wiadomości"
+	help = "Umożliwia opuszczenie danego pokoju i zaprzestanie przysyłania z niego wiadomości."
 	def run(self, user, params):
 		if len(params) == 0:
 			Message.reply(u"Podaj nazwę pokoju wpisując np.: '/leave pomoc'.")
