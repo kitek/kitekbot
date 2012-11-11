@@ -15,6 +15,7 @@ from library.XmppUnsubscribed import UnsubscribedHandler
 from library.XmppAvailable import AvailableHandler
 from library.XmppUnavailable import UnavailableHandler
 from library.XmppMessage import MessageHandler
+from library.XmppProbe import ProbeHandler
 
 app = webapp2.WSGIApplication([
 	('/', IndexController),
@@ -27,6 +28,7 @@ app = webapp2.WSGIApplication([
 	('/_ah/xmpp/subscription/unsubscribed/', UnsubscribedHandler),
 	('/_ah/xmpp/presence/available/', AvailableHandler),
 	('/_ah/xmpp/presence/unavailable/', UnavailableHandler),
+	('/_ah/xmpp/presence/probe/', ProbeHandler),
 	('/_ah/xmpp/message/chat/', MessageHandler)
 
 ],debug=os.environ['SERVER_SOFTWARE'].startswith('Development'))
