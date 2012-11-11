@@ -38,13 +38,17 @@ class RoomsCommand(Command):
 							ext = u"osoby"
 						if room.count > 4:
 							ext = u"osób"
-						response+="* #"+room.name+" (Id: %s) - "+("Ja + " if mySubs.has_key(room.name) else "")+str(room.count)+" "+ext+"\n" % (room.seqId)
+						if mySubs.has_key(room.name):
+							ext = u"Ja + %s %s" % (room.count, ext)
+						else:
+							ext = "%s %s" % (room.count, ext)
+						response+=u"* #%s (Id: %s) - %s\n" % (room.name, room.seqId, ext)
 					else:
-						response+="* #"+room.name+" (Id: %s) - tylko Ja\n" % (room.seqId)
+						response+=u"* #"+room.name+" (Id: %s) - tylko Ja\n" % (room.seqId)
 			Message.reply(response)
 		else:
 			# Wyswietl o podanej nazwie
-			roomName = params[0]
+			roomName = params[0].lower().strip()
 			roomSubscriptions = RoomSubscriptions.all().filter("name =",roomName).fetch(limit=self.LIMIT)
 			if len(roomSubscriptions) == 0:
 				Message.reply(u"Brak informacji o pokoju '%s'. Możesz go utworzyć wpisując '/join %s'." % (roomName,roomName))
@@ -65,10 +69,11 @@ class JoinCommand(Command):
 			u"Nazwa pokoju może składac się tylko z liter, cyfr, podkreślników i myślników. " \
 			u"Minimalna długość nazwy pokoju to 3 znaki. Pokój główny ma nazwę 'global' i wszyscy użytkownicy automatycznie " \
 			u"go subskrybują. Zobacz również inne powiązane komendy: '/rooms', '/leave' lub '/invite'."
+	
 	def run(self, user, params):
 		roomName = ''
 		if len(params) > 0:
-			roomName = params[0]
+			roomName = params[0].lower().strip()
 		isValidName = Rooms.isValidName(roomName)
 		if True != isValidName:
 			Message.reply(isValidName)
@@ -96,7 +101,7 @@ class JoinCommand(Command):
 			room.count = room.count + 1
 			room.put()
 			# Wysylamy wiadomosc do innych osob w danym pokoju
-			Message.broadcast(u"[%s] %s dołączył do pokoju." % (user.jid, roomName), roomName)
+			Message.broadcastSystem(u"[%s] %s dołączył do pokoju." % (user.jid, roomName), roomName, user.jid)
 		RoomSubscriptions(key_name=mySubName, name=roomName, jid=user.jid).put()
 
 		# Wiadomość dla usera
@@ -104,10 +109,62 @@ class JoinCommand(Command):
 		response+= u"Zawsze możesz opuścić pokój wpisując '/leave %s'. Do wyświetlenia osób w pokoju użyj '/rooms %s'." % (roomName,roomName)
 		Message.reply(response)
 
+class SwitchCommand(Command):
+	description = u"Zmienia pokój w którym domyślnie piszemy."
+	help = u"Wymaga parametru określającego nazwę pokoju. Umożliwia przełączanie się pomiędzy pokojami. " \
+			u"Jeżeli komenda zostanie uruchomiona bez parametru wyświetlona zostanie nazwa pokoju w którym aktualnie piszemy."
 
+	def run(self, user, params):
+		roomName = 'global'
+		if len(params) == 0:
+			Message.reply(u"Aktualnie piszesz w pokoju: '%s'." % (user.currentRoom))
+		else:	
+			roomName = params[0].lower().strip()
+			if roomName != user.currentRoom:
+				# Sprawdz czy posiadasz subskrybcje w tym pokoju
+				subs = RoomSubscriptions.getByName(roomName)
+				if len(subs) == 0:
+					Message.reply(u"Brak pokoju o nazwie: '%s'. Listę dostępnych pokoi uzyskasz wpisując '/rooms'." % (roomName))
+					return False
+				if user.jid not in subs:
+					Message.reply(u"Nie możesz pisać w tym pokoju ponieważ nie posiadasz aktywnej subskrypcji. Wpisz '/join %s' by dołączyć do pokoju." % (roomName))
+					return False
+				# Aktualizacja w bazie
+				user.currentRoom = roomName
+				user.put()
+			Message.reply(u"Od tej chwili będziesz pisał w pokoju '%s'. Aby przełączyć się do innego pokoju wpisz '/switch nazwaPokoju'." % (roomName))
+		return True
 
+class LeaveCommand(Command):
+	description = u"Usuwa subskrypcję z danego pokoju."
+	help = "Umożliwia opuszczenie danego pokoju i zaprzestanie przysyłania z niego wiadomości"
+	def run(self, user, params):
+		if len(params) == 0:
+			Message.reply(u"Podaj nazwę pokoju wpisując np.: '/leave pomoc'.")
+			return False
+		roomName = params[0].lower().strip()
+		isValidName = Rooms.isValidName(roomName)
+		if True != isValidName:
+			Message.reply(isValidName)
+			return False
+		# Sprawdzamy czy posiadamy suba
+		subs = RoomSubscriptions.getByName(roomName)
+		if len(subs) == 0:
+			Message.reply(u"Brak pokoju o nazwie: '%s'. Listę dostępnych pokoi uzyskasz wpisując '/rooms'." % (roomName))
+			return False
+		if user.jid in subs:
+			mySubName = '%s/%s' % (roomName, user.jid)
+			myRoomSubscriptions = RoomSubscriptions.get_by_key_name(mySubName)
+			if myRoomSubscriptions != None:
+				myRoomSubscriptions.delete()
+			Message.reply(u"Od tej pory nie będziesz otrzymywał wiadomości z pokoju '%s'. Zawsze możesz powrócić do pokoju wpisując '/join %s'." % (roomName,roomName))
+			Message.broadcastSystem(u"[%s] %s opuścił pokój." % (user.jid, roomName), roomName)
+			return True
+		Message.reply(u"Nie posiadasz subskrypcji pokoju '%s'." % (roomName))
+		return False
+
+# Register commands
 CommandDispatcher.register('rooms', RoomsCommand)
 CommandDispatcher.register('join', JoinCommand)
-
-
-
+CommandDispatcher.register('switch', SwitchCommand)
+CommandDispatcher.register('leave', LeaveCommand)

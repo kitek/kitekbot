@@ -6,6 +6,7 @@ import webapp2
 # Web
 from controllers.Index import IndexController
 from controllers.Debug import DebugController
+from controllers.Admin import AdminController
 # Xmpp
 from library.XmppSubscribe import SubscribeHandler
 from library.XmppSubscribed import SubscribedHandler
@@ -18,6 +19,7 @@ from library.XmppMessage import MessageHandler
 app = webapp2.WSGIApplication([
 	('/', IndexController),
 	('/debug', DebugController),
+	('/admin', AdminController),
 
 	('/_ah/xmpp/subscription/subscribe/', SubscribeHandler),
 	('/_ah/xmpp/subscription/subscribed/', SubscribedHandler),

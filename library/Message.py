@@ -7,6 +7,7 @@ from google.appengine.api import xmpp
 from models.UsersSettings import UsersSettings
 from models.Users import Users
 from models.Chats import Chats
+from models.RoomSubscriptions import RoomSubscriptions
 
 """
 Realizuje:
@@ -17,70 +18,106 @@ Realizuje:
 
 
 """
-
 class Message(object):
 	user = None
 
 	@staticmethod
 	def broadcast(body, roomName = 'global'):
 		""" Wysyła wiadomość do wszystkich użytkowników w danym pokoju (currentRoom). """
-		# @todo implementacja pokoi - pewnie ten kod bedzie wymagal refaktoryzacji
-		jidsTo = {}
+		jidsTo = []
+		jidsOffline = []
+		settings = None
 
-		if 'global' == roomName:
+		# Jeżeli wysylamy wiadomosc do danego pokoju musimy sprawdzic kto go subskrybuje
+		if 'global' != roomName:
+			if '#' == body[0]:
+				body = body[len(roomName)+1:].strip()
+			jidsTo = RoomSubscriptions.getByName(roomName)
+			if len(jidsTo) == 0:
+				Message.reply(u"Twoja wiadomość nie może zostać dostarczona. Brak osób, które subskrybują ten pokój.")
+				return 	False
+			if Message.user.jid not in jidsTo:
+				# Sprawdz czy subskrybujesz dany pokoj
+				Message.reply(u"Nie możesz pisać wiadomości w pokoju '%s' ponieważ nie posiadasz aktywnej subskrypcji. Wpisz '/join %s' by dołączyć do pokoju." % (roomName, roomName))
+				return False
+			# Unsetnij mnie i zobacz czy ktos został
+			for item in reversed(jidsTo):
+				if item == Message.user.jid:
+					jidsTo.remove(item)
+			if len(jidsTo) == 0:
+				Message.reply(u"Twoja wiadomość nie może zostać dostarczona. Brak osób, które subskrybują ten pokój.")
+				return False
+			# Sprawdz kto jest offline
+			allUsers = Users.getAll(Message.user.jid)
+			for item in allUsers:
+				if item.lastOnline != None and item.jid in jidsTo:
+					jidsOffline.append(item.jid)
+			del allUsers
+		else:
 			allUsers = Users.getAll(Message.user.jid)
 			if 0 == len(allUsers):
 				Message.reply(u"Twoja wiadomość nie może zostać dostarczona. Brak osób, które mogłyby na nią odpowiedzieć.")
 				return False
 			# Budujemy kolekcję odbiorców wiadomości
 			for item in allUsers:
-				jidsTo[item.jid] = item.lastOnline
+				jidsTo.append(item.jid)
+				if item.lastOnline != None:
+					jidsOffline.append(item.jid)
+			del allUsers
 			# Sprawdzamy kto nie chce otrzymywac wiadomosci z global'a - tych odrzucamy (globalChat = disabled)
-			settings = UsersSettings.get(jidsTo.keys())
-			jidsToCopy = jidsTo.copy()
+			settings = UsersSettings.get(jidsTo)
 			for item in settings:
 				if settings[item].has_key('globalChat') and 'disabled' == settings[item]['globalChat']:
-					del jidsToCopy[item]
-			jidsTo = jidsToCopy.copy()
-			del jidsToCopy
+					jidsTo = filter(lambda name: name != item, jidsTo)
 			if 0 == len(jidsTo):
 				Message.reply(u"Twoja wiadomość nie może zostać dostarczona. Wszystkie dostępne osoby wyłączyły otrzymywanie wiadomości z czatu globalnego.")
 				return False
+
+		if len(jidsOffline) > 0:
 			# sprawdzamy kto jest offline i czy ma wyłaczone otrzymywanie wiadomości gdy jesteś offline - tych odrzucamy (offlineChat = disabled)
-			jidsToCopy = jidsTo.copy()
-			for item in jidsTo:
-				if jidsTo[item] != None and settings[item].has_key('offlineChat') and 'disabled' == settings[item]['offlineChat']:
-					del jidsToCopy[item]
-			jidsTo = jidsToCopy.copy()
-			del jidsToCopy
-			if 0 == len(jidsTo):
-				Message.reply(u"Twoja wiadomość nie może zostać dostarczona. Brak osób, które mogłyby na nią odpowiedzieć.")
-				return False
-			Message.send(jidsTo, body, roomName)
+			if None == settings:
+				settings = UsersSettings.get(jidsOffline)
+			for item in settings:
+				if item in jidsOffline and settings[item].has_key('offlineChat') and 'disabled' == settings[item]['offlineChat']:
+					jidsTo = filter(lambda name: name != item, jidsTo)
+		
+		if 0 == len(jidsTo):
+			Message.reply(u"Twoja wiadomość nie może zostać dostarczona. Brak osób, które mogłyby na nią odpowiedzieć.")
+			return False
+
+		Message.send(jidsTo, body, roomName)
+
+	@staticmethod
+	def broadcastSystem(body, roomName, exceptJid = None):
+		""" Wysyła wiadomość do wszystkich użytkowników w danym pokoju jako wiadomość systemowa """
+		pass
 
 	@staticmethod
 	def reply(body):
 		""" Wysyła odpowiedź zwrotną do użytkownika (jednego). """
-		return Message.send(Message.user.jid, body, recordChat = False)
+		return Message.send(Message.user.jid, body, recordChat = False, sendJid = False)
 
 	@staticmethod
-	def send(jids, body, roomName = 'global', recordChat = True):
+	def send(jids, body, roomName = 'global', recordChat = True, sendJid = True):
 		body = Message.format(body)
 		if False == Message.isValid(body):
 			Message.reply(u"Wpisz dłuższą wiadomość.")
 			return False
-		# Wyślij wiadomości
-		# @todo Przy reply nie powinno wysylac mi mojego jid'a bo po co?
-		SentResult = xmpp.send_message(jids, u"%s: %s" % (re.sub(r'([\w\.-]+)@([\w\.-]+)', r'\1',Message.user.jid),body))
 		# Zapisz infomacje w bazie
 		if True == recordChat:
 			try:
 				Chats(body=body,jid=Message.user.jid,message=body,roomName=roomName).put()
 			except:
-				logging.error('Error while inserting message: "%s"' % (body))
+				logging.error(u'Error while inserting message: "%s"' % (body))
+		# Wyślij wiadomości
+		if sendJid:
+			body = u"%s: %s" % (re.sub(r'([\w\.-]+)@([\w\.-]+)', r'\1',Message.user.jid),body)
+		SentResult = xmpp.send_message(jids, body)
 		if SentResult != xmpp.NO_ERROR:
-			logging.error('Error while sending message: "%s" from %s' % (body, Message.user.jid))
+			logging.error(u'Error while sending message: "%s" from %s' % (body, Message.user.jid))
 			return False
+		if 'global' != roomName:
+			Message.reply(u"Wiadomość została wysłana do pokoju '%s'." % (roomName))
 		return True
 
 	@staticmethod

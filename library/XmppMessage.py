@@ -19,8 +19,8 @@ class MessageHandler(XmppHandler):
 			CommandDispatcher.dispatch(cmdName, self.data['user'], cmdParams)
 		elif '#' == self.data['body'][0]:
 			# Wiadomość do konkretnego pokoju
-			# @todo Parsuj nazwe pokoju i treść wiadomości
-			pass
+			roomName = self.data['body'].split(' ')[0].replace('#','')
+			Message.broadcast(self.data['body'], roomName)
 		else:
 			# Wiadomość globalna lub w pokoju w którym aktualnie znajduje się user
 			Message.broadcast(self.data['body'], self.data['user'].currentRoom)
