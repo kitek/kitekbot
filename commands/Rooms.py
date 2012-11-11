@@ -157,6 +157,10 @@ class LeaveCommand(Command):
 			myRoomSubscriptions = RoomSubscriptions.get_by_key_name(mySubName)
 			if myRoomSubscriptions != None:
 				myRoomSubscriptions.delete()
+			if user.currentRoom == roomName:
+				# aktualizacja currentRoom w przypadku gdy ustawiony był na opuszczany pokoj
+				user.currentRoom = 'global'
+				user.put()
 			Message.reply(u"Od tej pory nie będziesz otrzymywał wiadomości z pokoju '%s'. Zawsze możesz powrócić do pokoju wpisując '/join %s'." % (roomName,roomName))
 			Message.broadcastSystem(u"[%s] %s opuścił pokój." % (user.jid, roomName), roomName)
 			return True

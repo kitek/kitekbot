@@ -80,18 +80,42 @@ class Message(object):
 			for item in settings:
 				if item in jidsOffline and settings[item].has_key('offlineChat') and 'disabled' == settings[item]['offlineChat']:
 					jidsTo = filter(lambda name: name != item, jidsTo)
-		
 		if 0 == len(jidsTo):
 			Message.reply(u"Twoja wiadomość nie może zostać dostarczona. Brak osób, które mogłyby na nią odpowiedzieć.")
 			return False
-
-		Message.send(jidsTo, body, roomName)
+		return Message.send(jidsTo, body, roomName)
 
 	@staticmethod
 	def broadcastSystem(body, roomName, exceptJid = None):
 		""" Wysyła wiadomość do wszystkich użytkowników w danym pokoju jako wiadomość systemowa """
-		pass
+		jidsTo = RoomSubscriptions.getByName(roomName)
+		jidsOffline = []
 
+		if len(jidsTo) == 0:
+			return False
+		if None != exceptJid:
+			if 'list' == type(exceptJid).__name__:
+				for item in exceptJid:
+					jidsTo = filter(lambda name: name != item, jidsTo)
+			elif 'str' == type(exceptJid).__name__:
+				jidsTo = filter(lambda name: name != exceptJid, jidsTo)
+		if len(jidsTo) == 0:
+			return False
+		allUsers = Users.getAll()
+		for item in allUsers:
+			if item.jid in jidsTo and item.lastOnline != None:
+				jidsOffline.append(item.jid)
+		del allUsers
+		if len(jidsOffline) > 0:
+			# sprawdzamy kto jest offline i czy ma wyłaczone otrzymywanie wiadomości gdy jesteś offline - tych odrzucamy (offlineChat = disabled)
+			settings = UsersSettings.get(jidsOffline)
+			for item in settings:
+				if settings[item].has_key('offlineChat') and 'disabled' == settings[item]['offlineChat']:
+					jidsTo = filter(lambda name: name != item, jidsTo)
+		if len(jidsTo) == 0:
+			return False
+		return Message.send(jidsTo, body, recordChat = False, sendJid = False)
+		
 	@staticmethod
 	def reply(body):
 		""" Wysyła odpowiedź zwrotną do użytkownika (jednego). """
