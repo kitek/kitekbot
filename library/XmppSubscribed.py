@@ -28,8 +28,7 @@ class SubscribedHandler(XmppHandler):
 		newUser.put()
 
 		# Domyślne ustawienia konta
-		UsersSettings.set(self.jid, 'globalChat', 'enabled') # Chce otrzymywać wiadomości z czatu global'nego
-		UsersSettings.set(self.jid, 'offlineChat', 'enabled') # Chce otrzymywać wiadomości gdy jestem offline
+		UsersSettings.setupDefaults(self.jid)
 
 		if self.data.has_key('invitedUser') and isinstance(self.data['invitedUser'], UsersInvited):
 			self.data['invitedUser'].delete()

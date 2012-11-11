@@ -8,13 +8,23 @@ from models.Users import Users
 
 
 class UsersSettings(db.Model):
-	"""
-	* globalChat - ['enabled', 'disabled'], default = enabled - otrzymywanie wiadomości z global'a
-	* offlineChat - ['enabled', 'disabled'],  default = enabled - otrzymywanie wiadomości gdy user jest offline
-	"""
+	DEFAULTS = {'globalChat':'enabled','offlineChat':'enabled'}
+	DEFAULTS_HELP = {'globalChat':u"Otrzymywanie wiadomości z czatu globalnego.",\
+					'offlineChat':u"Otrzymywanie wiadomości gdy jesteśmy offline."}
+	DEFAULTS_VALUES = {'globalChat':['enabled','disabled'],'offlineChat':['enabled','disabled']}
+
 	jid = db.StringProperty(required=True)
 	name = db.StringProperty(required=True)
 	value = db.StringProperty()
+
+	@staticmethod
+	def getDefaults():
+		return UsersSettings.DEFAULTS
+
+	@staticmethod
+	def setupDefaults(jid):
+		for item in UsersSettings.getDefaults():
+			UsersSettings.set(jid, item, UsersSettings.DEFAULTS[item])
 
 	@staticmethod
 	def set(jid,name,value=''):
