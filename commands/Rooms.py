@@ -6,6 +6,7 @@ import re
 from library.Message import Message
 from library.XmppCommand import Command
 from library.XmppCommand import CommandDispatcher
+from models.Users import Users
 from models.Rooms import Rooms
 from models.Sequence import *
 from models.RoomSubscriptions import RoomSubscriptions
@@ -167,8 +168,48 @@ class LeaveCommand(Command):
 		Message.reply(u"Nie posiadasz subskrypcji pokoju '%s'." % (roomName))
 		return False
 
+class InviteCommand(Command):
+	description = u"Zaprasza danego użytkownika do wybranego pokoju."
+	help = u"Komenda wymaga dwóch parametrów: nazwy użytkownika i pokoju. Zapraszający musi sam posiadać subskrypcję w danym pokoju."
+	def run(self, user, params):
+		if len(params) != 2:
+			Message.reply(u"Błędna konstrukcja komendy. Podaj nazwę użytkownika, a następnie nazwę pokoju do którego zapraszasz np.: '/intite piotr@domena.pl pomoc'.")
+			return
+		jid = params[0].strip()
+		roomName = params[1].lower().strip()
+		logging.info('invite %s to %s' % (jid, roomName))
+
+		if user.jid == jid:
+			Message.reply(u"Zaproś kogoś innego.")
+			return
+		# Sprawdzamy czy user istnieje
+		invitedUser = Users.getByJid(jid)
+		if None == invitedUser:
+			Message.reply(u"Użytkownik %s nie istnieje. Podaj kogoś innego." % (jid))
+			return
+		isValidName = Rooms.isValidName(roomName)
+		if True != isValidName:
+			Message.reply(isValidName)
+			return 
+		# Sprawdzamy czy posiadam subskrybcję do podanego pokoju
+		mySubName = '%s/%s' % (roomName, user.jid)
+		myRoomSubscriptions = RoomSubscriptions.get_by_key_name(mySubName)
+		if None == myRoomSubscriptions:
+			Message.reply(u"Pokój '%s' nie istnieje lub nie posiadasz do niego subskrypcji." % (roomName))
+			return
+		# Sprawdzamy czy zapraszany posiada juz subskrybcje
+		mySubName = '%s/%s' % (roomName, jid)
+		myRoomSubscriptions = RoomSubscriptions.get_by_key_name(mySubName)
+		if None != myRoomSubscriptions:
+			Message.reply(u"%s posiada już subskrypcję pokoju '%s'." % (jid, roomName))
+			return
+		RoomSubscriptions(key_name=mySubName,name=roomName,jid=jid).put()
+		Message.broadcastSystem(u"'%s' dołączył do pokoju." % (jid), roomName, jid)
+		Message.SendToUser(jid, u"Zostałeś zaproszony do pokoju '%s' przez '%s'." % (roomName, user.jid))
+
 # Register commands
 CommandDispatcher.register('rooms', RoomsCommand)
 CommandDispatcher.register('join', JoinCommand)
 CommandDispatcher.register('switch', SwitchCommand)
 CommandDispatcher.register('leave', LeaveCommand)
+CommandDispatcher.register('invite', InviteCommand)

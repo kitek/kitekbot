@@ -114,8 +114,16 @@ class Message(object):
 					jidsTo = filter(lambda name: name != item, jidsTo)
 		if len(jidsTo) == 0:
 			return False
+		if 'global' != roomName:
+			body = u"#"+roomName+body
 		return Message.send(jidsTo, body, recordChat = False, sendJid = False)
-		
+	
+	@staticmethod
+	def sendToUser(jid, body):
+		# Sprawdz czy user chce otrzymywac wiadomości jak jest offline
+		# Wyślij wiadomość
+		pass
+
 	@staticmethod
 	def reply(body):
 		""" Wysyła odpowiedź zwrotną do użytkownika (jednego). """
