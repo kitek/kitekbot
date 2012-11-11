@@ -3,6 +3,8 @@
 
 import logging
 import re
+from google.appengine.api import xmpp
+from google.appengine.api import memcache
 from google.appengine.api import capabilities
 from models.Users import Users
 from library.Message import Message
@@ -33,4 +35,23 @@ class QuotaCommand(Command):
 			response+="\n"
 		Message.reply(response)
 
+class SetStatusCommand(Command):
+	aclRole = 'admin'
+	description = u"Ustawia XMPP status dla bot'a."
+	help = u"Ustawia XMPP status dla bot'a."
+	def run(self, user, params):
+		if len(params) == 0:
+			Message.reply(u"Podaj status.")
+			return
+		status = params[0].strip()
+		memcache.set('xmppStatus', status)
+		Message.reply(u"Status został zaaktualizowany.")
+		# Rozeslij do wszystkich online swoj status
+		usersAll = Users.getAll()
+		for item in usersAll:
+			if item.lastOnline == None:
+				xmpp.send_presence(item.jid, status, presence_show=xmpp.PRESENCE_TYPE_AVAILABLE)
+
 CommandDispatcher.register('quota', QuotaCommand)
+CommandDispatcher.register('setstatus', SetStatusCommand)
+
