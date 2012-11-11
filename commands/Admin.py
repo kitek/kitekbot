@@ -31,6 +31,6 @@ class QuotaCommand(Command):
 			else:
 				response+=u"ERROR"
 			response+="\n"
-		logging.info(response)
+		Message.reply(response)
 
 CommandDispatcher.register('quota', QuotaCommand)

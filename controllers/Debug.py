@@ -10,7 +10,7 @@ from models.Users import Users
 from models.UsersInvited import UsersInvited
 from models.UsersSettings import UsersSettings
 from library.XmppCommand import CommandDispatcher
-
+from google.appengine.api import users
 
 
 
@@ -21,8 +21,10 @@ class DebugController(BaseController):
 		#CommandDispatcher.register('online',comamndClass)
 		#CommandDispatcher.register('offline',comamndClass2)
 
+		user = users.get_current_user()
+		logging.info(user.email())
 
-		jid = 'tomek@o2.pl'
+		#jid = 'tomek@o2.pl'
 		#user = Users.getByJid(jid)
 		#user.lastOnline = datetime.datetime.now()
 		#user.put()
@@ -30,7 +32,7 @@ class DebugController(BaseController):
 		#globalChat = UsersSettings.get(jid, 'globalChat')
 		#logging.info(globalChat)
 
-		settings = UsersSettings.set(jid,'offlineChat','disabled')
+		#settings = UsersSettings.set(jid,'offlineChat','disabled')
 		
 
 		
