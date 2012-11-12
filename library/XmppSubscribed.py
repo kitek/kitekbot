@@ -4,6 +4,7 @@
 import datetime
 import logging
 from library.XmppCore import XmppHandler
+from library.Message import Message
 from models.Users import Users
 from models.UsersInvited import UsersInvited
 from models.UsersSettings import UsersSettings
@@ -14,11 +15,9 @@ Implementuje:
 - Dodanie użytkownika do Roster'a (kolekcja Users)
 - Usuniecie z listy zaproszeń (kolekcja UsersInvited)
 - Wysłanie wiadomości powitalnej do nowego użytkownika
-@todo - Wysłanie wiadomości do pozostałych osób o dołączeniu
-
 """
 class SubscribedHandler(XmppHandler):
-	WELCOME_MESSAGE = 'Witaj %s.' # @todo Przygotować lepszy komunikat
+	WELCOME_MESSAGE = u"Witaj %s.\nWpisz wiadomość i wciśnij ENTER.\nLista obsługiwanych komend dostępna jest po wpisaniu: '/help'."
 
 	def post(self):
 		logging.info("Subscribe confirmed (subscribed) from: %s", self.jid)
@@ -34,5 +33,9 @@ class SubscribedHandler(XmppHandler):
 			self.data['invitedUser'].delete()
 			del self.data['invitedUser']
 
-		# @todo Przerobić wysylke wiadomosci
-		self.sendMessage(self.WELCOME_MESSAGE%(self.jidName))
+		Message.user = newUser
+		Message.reply(self.WELCOME_MESSAGE%(self.jidName))
+
+		# Broadcast do wszystkich
+		Message.broadcastSystem(u"Nowy użytkownik: %s" % (self.jid), roomName='global', exceptJid=self.jid)
+

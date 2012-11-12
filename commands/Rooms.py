@@ -102,12 +102,12 @@ class JoinCommand(Command):
 			room.count = room.count + 1
 			room.put()
 			# Wysylamy wiadomosc do innych osob w danym pokoju
-			Message.broadcastSystem(u"[%s] %s dołączył do pokoju." % (user.jid, roomName), roomName, user.jid)
+			Message.broadcastSystem(u"%s dołączył do pokoju." % (user.jid), roomName, user.jid)
 		RoomSubscriptions(key_name=mySubName, name=roomName, jid=user.jid).put()
 
 		# Wiadomość dla usera
-		response = u"Od tej pory będziesz otrzymywał rozmowy z pokoju '%s', aby wysłać wiadomość do osób w tym pokoju wpisz: '#%s treść wiadomości'. " % (roomName,roomName)
-		response+= u"Zawsze możesz opuścić pokój wpisując '/leave %s'. Do wyświetlenia osób w pokoju użyj '/rooms %s'." % (roomName,roomName)
+		response = u"Od tej pory będziesz otrzymywał rozmowy z pokoju '%s', aby wysłać wiadomość do osób w tym pokoju wpisz: '#%s treść wiadomości'.\n" % (roomName,roomName)
+		response+= u"Zawsze możesz opuścić pokój wpisując '/leave %s'.\nDo wyświetlenia osób w pokoju użyj '/rooms %s'." % (roomName,roomName)
 		Message.reply(response)
 
 class SwitchCommand(Command):
@@ -123,13 +123,14 @@ class SwitchCommand(Command):
 			roomName = params[0].lower().strip()
 			if roomName != user.currentRoom:
 				# Sprawdz czy posiadasz subskrybcje w tym pokoju
-				subs = RoomSubscriptions.getByName(roomName)
-				if len(subs) == 0:
-					Message.reply(u"Brak pokoju o nazwie: '%s'. Listę dostępnych pokoi uzyskasz wpisując '/rooms'." % (roomName))
-					return False
-				if user.jid not in subs:
-					Message.reply(u"Nie możesz pisać w tym pokoju ponieważ nie posiadasz aktywnej subskrypcji. Wpisz '/join %s' by dołączyć do pokoju." % (roomName))
-					return False
+				if 'global' != roomName:
+					subs = RoomSubscriptions.getByName(roomName)
+					if len(subs) == 0:
+						Message.reply(u"Brak pokoju o nazwie: '%s'. Listę dostępnych pokoi uzyskasz wpisując '/rooms'." % (roomName))
+						return False
+					if user.jid not in subs:
+						Message.reply(u"Nie możesz pisać w tym pokoju ponieważ nie posiadasz aktywnej subskrypcji. Wpisz '/join %s' by dołączyć do pokoju." % (roomName))
+						return False
 				# Aktualizacja w bazie
 				user.currentRoom = roomName
 				user.put()
@@ -158,12 +159,25 @@ class LeaveCommand(Command):
 			myRoomSubscriptions = RoomSubscriptions.get_by_key_name(mySubName)
 			if myRoomSubscriptions != None:
 				myRoomSubscriptions.delete()
+
+				# Aktualizacja licznikow
+				room = Rooms.get_by_key_name(roomName)
+				if None != room:
+					if room.count <= 1:
+						# Została ostatnia osoba usuwamy pokoj
+						room.delete()
+						pass
+					else:
+						# Ktos jescze został, zaaktualizuj liczniki
+						room.count = room.count - 1
+						room.put()
+
 			if user.currentRoom == roomName:
 				# aktualizacja currentRoom w przypadku gdy ustawiony był na opuszczany pokoj
 				user.currentRoom = 'global'
 				user.put()
 			Message.reply(u"Od tej pory nie będziesz otrzymywał wiadomości z pokoju '%s'. Zawsze możesz powrócić do pokoju wpisując '/join %s'." % (roomName,roomName))
-			Message.broadcastSystem(u"[%s] %s opuścił pokój." % (user.jid, roomName), roomName)
+			Message.broadcastSystem(u"%s opuścił pokój." % (user.jid), roomName)
 			return True
 		Message.reply(u"Nie posiadasz subskrypcji pokoju '%s'." % (roomName))
 		return False

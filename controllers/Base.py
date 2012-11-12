@@ -6,6 +6,7 @@ import webapp2
 from webapp2_extras import jinja2
 from google.appengine.api import users
 from models.Users import Users
+from models.UsersSettings import UsersSettings
 
 
 class BaseController(webapp2.RequestHandler):
@@ -37,8 +38,14 @@ class BaseController(webapp2.RequestHandler):
 		# Sprawdz czy user jest w bazie
 		self.currentUser = Users.getByJid(googleUser.email())
 		if None == self.currentUser:
-			self.forbidden()
-			return
+			# Jeżeli jest to administrator to utworz konto i wpuść dalej
+			if users.is_current_user_admin():
+				Users(key_name=googleUser.email(), aclRole='admin').put()
+				UsersSettings.setupDefaults(googleUser.email())
+				self.currentUser = Users.getByJid(googleUser.email())
+			else:
+				self.forbidden()
+				return
 		try:
 			# Dispatch the request.
 			webapp2.RequestHandler.dispatch(self)

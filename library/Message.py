@@ -88,24 +88,39 @@ class Message(object):
 	@staticmethod
 	def broadcastSystem(body, roomName, exceptJid = None):
 		""" Wysyła wiadomość do wszystkich użytkowników w danym pokoju jako wiadomość systemowa """
-		jidsTo = RoomSubscriptions.getByName(roomName)
+		jidsTo = []
 		jidsOffline = []
+		allUsers = None
+
+		if 'global' == roomName:
+			allUsers = Users.getAll()
+			for item in allUsers:
+				jidsTo.append(item.jid)
+				if item.jid in jidsTo and item.lastOnline != None:
+					jidsOffline.append(item.jid)
+		else:
+			jidsTo = RoomSubscriptions.getByName(roomName)
 
 		if len(jidsTo) == 0:
 			return False
+
 		if None != exceptJid:
 			if 'list' == type(exceptJid).__name__:
 				for item in exceptJid:
 					jidsTo = filter(lambda name: name != item, jidsTo)
-			elif 'str' == type(exceptJid).__name__:
+			elif type(exceptJid).__name__ in ['str','unicode']:
 				jidsTo = filter(lambda name: name != exceptJid, jidsTo)
+		
 		if len(jidsTo) == 0:
 			return False
-		allUsers = Users.getAll()
-		for item in allUsers:
-			if item.jid in jidsTo and item.lastOnline != None:
-				jidsOffline.append(item.jid)
-		del allUsers
+
+		if None == allUsers:
+			allUsers = Users.getAll()
+			for item in allUsers:
+				if item.jid in jidsTo and item.lastOnline != None:
+					jidsOffline.append(item.jid)
+			del allUsers
+
 		if len(jidsOffline) > 0:
 			# sprawdzamy kto jest offline i czy ma wyłaczone otrzymywanie wiadomości gdy jesteś offline - tych odrzucamy (offlineChat = disabled)
 			settings = UsersSettings.get(jidsOffline)
@@ -114,9 +129,7 @@ class Message(object):
 					jidsTo = filter(lambda name: name != item, jidsTo)
 		if len(jidsTo) == 0:
 			return False
-		if 'global' != roomName:
-			body = u"#"+roomName+body
-		return Message.send(jidsTo, body, recordChat = False, sendJid = False)
+		return Message.send(jidsTo, body, roomName, recordChat = False, sendJid = False)
 	
 	@staticmethod
 	def sendToUser(jid, body):
@@ -143,12 +156,19 @@ class Message(object):
 				logging.error(u'Error while inserting message: "%s"' % (body))
 		# Wyślij wiadomości
 		if sendJid:
-			body = u"%s: %s" % (re.sub(r'([\w\.-]+)@([\w\.-]+)', r'\1',Message.user.jid),body)
-		SentResult = xmpp.send_message(jids, body)
-		if SentResult != xmpp.NO_ERROR:
-			logging.error(u'Error while sending message: "%s" from %s' % (body, Message.user.jid))
-			return False
-		if 'global' != roomName:
+			# Jeżeli pokoj inny niz globl to uzyj konstrukcji [roomName] jid: body
+			username = Message.user.jid.split('@')[0]
+			if 'global' != roomName:
+				body = u"[%s] %s: %s" % (roomName, username, body)
+			else:
+				body = u"%s: %s" % (username, body)
+		# Jeżeli bez sendJid ale w danym pokoju to robimy [roomName] body (ale takich przypadkow nie powinno byc)
+		elif 'global' != roomName:
+			body = u"[%s] %s" % (roomName, body)
+
+		xmpp.send_message(jids, body)
+
+		if 'global' != roomName and sendJid:
 			Message.reply(u"Wiadomość została wysłana do pokoju '%s'." % (roomName))
 		return True
 

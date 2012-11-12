@@ -21,7 +21,7 @@ class QuotaCommand(Command):
 	description = u"Informacje statusie wykorzystywanych usług."
 	help = u"Informacje statusie wykorzystywanych usług. Więcej info: https://developers.google.com/appengine/docs/quotas"
 	def run(self, user, params):
-		response = u"Usługi:\n";
+		response = u"Status usług:\n";
 		services = {'Datastore reads':'datastore_v3','XMPP':'xmpp','Memcache': 'memcache','URL Fetch':'urlfetch'}
 		
 		response+=u"* Datastore writes:"
@@ -48,7 +48,7 @@ class SetStatusCommand(Command):
 		if len(params) == 0:
 			Message.reply(u"Podaj status.")
 			return
-		status = params[0].strip()
+		status = u" ".join(params).strip()
 		memcache.set('xmppStatus', status)
 		Message.reply(u"Status został zaaktualizowany.")
 		# Rozeslij do wszystkich online swoj status
@@ -89,11 +89,16 @@ class InviteUserCommand(Command):
 		xmpp.send_invite(jid)
 
 		botJid = app_identity.get_application_id()+'@appspot.com' # @todo custom domain? move to settings
+		botMail = u""
 
 		# Wyslij emaila do usera z info by dodal sobie kontakt
-		msg = u"Otrzymałeś możliwość korzystania z BOT'a: %s." \
-				u"Zaakceptuj go na swoim komunikatorze."
-		mail.send_mail(botJid, jid, u"Zaproszenie do kontaktów od %s" % (jid), msg)
+		msg = u"""
+Otrzymałeś możliwość korzystania z BOT'a: %s. Zaakceptuj go na swoim komunikatorze.
+Zaproszenie wysłane przez %s.
+""" % (botJid, user.jid)
+		#mail.send_mail(botMail, jid, u"Zaproszenie do %s" % (botJid), msg) 
+		# @todo Jak ogarnąć botMail'a (ustawienia w samej appki - jak to przechowywac?)
+
 
 # Register commands
 
