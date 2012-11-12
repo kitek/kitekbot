@@ -45,7 +45,8 @@ class Users(db.Model):
 		user = memcache.get(cacheName)
 		if user is None:
 			user = Users.get_by_key_name(jid)
-			memcache.set(cacheName, user)
+			if user is not None:
+				memcache.set(cacheName, user)
 		return user
 
 	@staticmethod
