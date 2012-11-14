@@ -10,6 +10,7 @@ from library.XmppCommand import CommandDispatcher
 
 class SettingsCommand(Command):
 	description = u"Wyświetla lub zmienia ustawienia użytkownika."
+	help = u"Przykład użycia: '/set globalChat enabled'."
 
 	def run(self, user, params):
 		# Gdy nie podano parametru zwróc aktualne ustawienia (wraz z domyślnymi)
@@ -41,4 +42,4 @@ class SettingsCommand(Command):
 		UsersSettings.set(user.jid, name, value)
 		Message.reply("Ustawiono '%s':%s" % (name, value))
 
-CommandDispatcher.register('set', SettingsCommand)
+CommandDispatcher.register(['set','ustaw'], SettingsCommand)

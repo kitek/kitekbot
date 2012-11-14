@@ -67,12 +67,4 @@ class XmppHandler(webapp2.RequestHandler):
 	def sendUnavailable(self, jid=None):
 		if None == jid:
 			jid = self.jid
-		xmpp.send_presence(self.jid,None,None,xmpp.PRESENCE_TYPE_UNAVAILABLE,xmpp.PRESENCE_SHOW_NONE)
-
-	# Prosta implementacja wysylki XMPP wiadomosci do podanego jid
-	def sendMessage(self, message, jid=None):
-		if None == jid:
-			jid = self.jid
-		xmpp.send_message(jid,message)
-
-		
+		xmpp.send_presence(self.jid,None,None,xmpp.PRESENCE_TYPE_UNAVAILABLE,xmpp.PRESENCE_SHOW_NONE)		

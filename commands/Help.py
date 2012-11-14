@@ -17,14 +17,30 @@ class HelpCommand(Command):
 	description = u"Informacje o dostępnych komendach bot'a. "
 	help = u"Wyświetla informacje o dostępnych komendach systemu. " \
 			u"Jeżeli podano parametr z nazwą komendy wyświetlona zostanie szczegółowa pomoc np.: " \
-			u"'/help online'. W przypadku gdy podana nazwa komendy nie istnieje zostanie wyświetlona lista wszystkich poleceń."
+			u"'/help online'. W przypadku gdy podana komenda nie istnieje zostanie wyświetlona lista wszystkich poleceń."
 
 	def run(self, user, params):
-		if len(params) == 1 and CommandDispatcher.commandNames.has_key(params[0]):
-			response = u"Komenda '/%s':\n%s" % (params[0],CommandDispatcher.commandNames[params[0]].help)
-			response+= u"\nDostęp do komendy posiada: '%s'." % (CommandDispatcher.commandNames[params[0]].aclRole)
-			Message.reply(response)
-			return
+		if len(params) == 1:
+			aliases = []
+			commandName = params[0].lower().strip()
+			# Sprawdz czy nie jest to alias
+			if CommandDispatcher.commandAliases.has_key(commandName):
+				commandName = CommandDispatcher.commandAliases[commandName]
+				aliases.append(u"'%s'" % commandName)
+
+			if CommandDispatcher.commandNames.has_key(commandName):
+				response = u"Komenda '/%s':\n%s" % (commandName,CommandDispatcher.commandNames[commandName].help)
+				
+				# Szukamy aliasow
+				for item in CommandDispatcher.commandAliases:
+					if CommandDispatcher.commandAliases[item] == commandName and item != params[0].lower().strip():
+						aliases.append(u"'%s'" % item)
+				if len(aliases):
+					response+= u"\nInne aliasy: %s." % (u", ".join(aliases))
+				
+				response+= u"\nDostęp do komendy posiada: '%s'." % (CommandDispatcher.commandNames[commandName].aclRole)
+				Message.reply(response)
+				return
 
 		response = u"Lista dostępnych komend [%s]:\n"
 		counter = 0
@@ -37,4 +53,4 @@ class HelpCommand(Command):
 		response+= u"Zawsze możesz dowiedzieć się więcej na temat komendy wpisując '/help nazwa komendy'."
 		Message.reply(response)
 
-CommandDispatcher.register('help', HelpCommand)
+CommandDispatcher.register(['help','pomoc'], HelpCommand)
