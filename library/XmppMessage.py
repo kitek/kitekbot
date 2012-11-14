@@ -17,6 +17,10 @@ class MessageHandler(XmppHandler):
 			cmdName = cmdString.split(' ')[0]
 			cmdParams = cmdString.split(' ')[1:]
 			CommandDispatcher.dispatch(cmdName, self.data['user'], cmdParams)
+		elif '##' == self.data['body'][0:2]:
+			# Wyślij wiadomość na czat główny gdy podano ##
+			body = self.data['body'][2:].strip()
+			Message.broadcast(body, u"global")
 		elif '#' == self.data['body'][0]:
 			# Wiadomość do konkretnego pokoju
 			roomName = self.data['body'].split(' ')[0].replace('#','')
