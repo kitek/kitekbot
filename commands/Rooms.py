@@ -222,8 +222,8 @@ class InviteCommand(Command):
 		Message.SendToUser(jid, u"Zostałeś zaproszony do pokoju '%s' przez '%s'." % (roomName, user.jid))
 
 # Register commands
-CommandDispatcher.register('rooms', RoomsCommand)
-CommandDispatcher.register('join', JoinCommand)
+CommandDispatcher.register(['rooms','pokoje'], RoomsCommand)
+CommandDispatcher.register(['join','dolacz'], JoinCommand)
 CommandDispatcher.register('switch', SwitchCommand)
-CommandDispatcher.register('leave', LeaveCommand)
-CommandDispatcher.register('invite', InviteCommand)
+CommandDispatcher.register(['leave', 'opusc'], LeaveCommand)
+CommandDispatcher.register(['invite', 'zapros'], InviteCommand)

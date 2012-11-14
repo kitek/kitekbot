@@ -1,34 +1,57 @@
 Kitekbot
 ====================
 
-Kitekbot jest botem XMPP stworzonym w Pythonie i opartym o Google App Engine.
+Kitekbot jest botem XMPP stworzonym w Pythonie i opartym o [Google App Engine](https://developers.google.com/appengine/ "GAE").
+
+Jego główną funkcjonalnością jest możliwość prowadzenia rozmów grupowych na kanale głównym lub we własnych pokojach.
+
+Dodatkowo Bot obsługuje zestaw kilku komend, które mogą zostać rozszerzone lub dostosowane do własnych potrzeb:
+
 * * *
-Obecnie bot obsługuje następujące funkcje / komendy:
+Lista komend:
 
-- **/help** - wyświetla dostępne komendy wraz z krótkim opisem
-- **/info** *wiadomość* - wysyła wiadomość do wszystkich użytkowników
-- **/sync** *plik1 plik2* - wysyła wiadomość o synchronizowanych plikach i oczekuje na odpowiedź
-- **/sync** *on|off* - wł/wył otrzymywanie informacji o synchronizowanych plikach
-- **/online** - wyświetla wszystkich użytkowników wraz ich statusami
-- **/join** *nazwaPokoju* - tworzy i subskrybuje podany pokój
-- **/leave** *nazwaPokoju* - opuszcza wybrany pokój
-- **/rooms** - wyświetla listę wszystkich dostępnych pokoi
-- **/rooms** *nazwaPokoju* - wyświetla informacje o wybranym pokoju
-- **/invite** *user nazwaPokoju* - zaprasza użytkownika do wybranego pokoju
-- **/switch** *nazwaPokoju* - umożliwia przełączanie się pomiędzy pokojami
+- **/help [nazwaKomendy]** - Informacje o dostępnych komendach bot'a (aliasy: pomoc).
+- **/rooms [nazwaPokoju]** - Lista dostępnych pokoi utworzonych przez użytkowników (alias: pokoje).
+- **/join nazwaPokoju** - Subskrybuje podany pokój. Jeżeli taki nie istnieje również go tworzy (alias: dolacz).
+- **/leave nazwaPokoju** - Usuwa subskrypcję z danego pokoju (alias: opusc).
+- **/switch nazwaPokoju** - Zmienia pokój w którym domyślnie piszemy.
+- **/invite emailUzytkownika nazwaPokoju** - Zaprasza danego użytkownika do wybranego pokoju (alias: zapros).
+- **/set [nazwa] [wartosc]** - Wyświetla lub zmienia ustawienia użytkownika (alias: ustaw).
+- **/last [nazwaPokoju] [limit]** - Lista ostatnich rozmów.
+- **/surl Url** - Skraca podany link (alias: tnij).
+- **/version** - Aktualna kompilacja Bot'a (alias: wersja).
+- **/online** - Lista użytkowników online.
+- **/offline** - Lista użytkowników offline.
+- **/quota** - Informacje o statusie wykorzystywanych przez Bot'a usług.
+- **/setstatus status** - Ustawia XMPP status dla bot'a.
+- **/inviteuser emailUzytkownika** - Zaprasza nowego użytkownika do systemu (roster'a Bot'a).
 
-### Przesyłanie wiadomości ######
-Pisanie wiadomości do wszystkich użytkowników możliwe jest na dwa sposoby: 
+### Wysyłanie wiadomości ###
 
-- napisanie wiadomości bez żadnej komendy
-- użycie komendy /info
+Pisanie wiadomości na kanale głównym ('global' - każdy domyślnie ten kanał subskrybuje) odbywa się przez wpisanie treści i wciśnięcie
+klawisza ENTER.
 
-Pisanie wiadomości w konkretnym pokoju możliwe jest poprzez:
+Pisanie do konkretnego pokoju możliwe jest przez podanie na początku naszej wiadomości _#nazwaPokoju_. 
 
-- podawanie na początku wiadomości *#nazwaPokoju* np.: *#tech Jest tam ktoś?* wyśle wiadomość do pokoju o nazwie *tech* (oczywiście wymagana jest wcześniejsza subskrypcja)
-- wcześniejsze przełączenie się do pokoju i wysłanie wiadomości bez żadnych parametrów np: 
+Na przykład wysłanie wiadomości do pokoju "pomoc" wygląda tak: _#pomoc Hey, czy ktoś potrzebuje pomocy?_
 
-> */switch tech*
->
-> Jest tam ktoś?
+### Pokoje ###
 
+Każdy z użytkowników ma możliwość tworzenia własnych, dołączania, zapraszania i opuszczania pokoju.
+
+Pokoje pełnią rolę osobnych czatów np. tematycznych i istnieją w celu nie zaśmiecania kanału głównego.
+
+Istnieje możliwość przełączenia domyślnego pisania wiadomości na konkretny pokój (nie trzeba wtedy przed treścią wiadomości podawać #nazwaPokoju).
+
+Powyższą funkcjonalność realizuje komenda "switch" (np _/switch pomoc_). Oczywiście istnieje zawsze możliwość powrotu do pokoju głównego przez podanie _/switch global_.
+
+Będąc przełączony na konretny pokój istnieje możliwość wysłania wiadomości na czat główny za pomocą konstrukcji: __## treść wiadomości__.
+
+### Ustawienia ###
+
+Każdy użytkownik ma możliwość pewnej konfiguracji Bot'a.
+
+Lista dostępnych ustawień i ich wartości:
+
+- **offlineChat [enabled|disabled]** - Otrzymywanie wiadomości gdy jesteśmy offline.
+- **globalChat [enabled|disabled]** - Otrzymywanie wiadomości z czatu globalnego.

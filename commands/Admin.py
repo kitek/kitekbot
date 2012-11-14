@@ -18,7 +18,7 @@ from library.XmppCommand import CommandDispatcher
 
 class QuotaCommand(Command):
 	aclRole = 'admin'
-	description = u"Informacje statusie wykorzystywanych usług."
+	description = u"Informacje o statusie wykorzystywanych przez Bot'a usług."
 	help = u"Informacje statusie wykorzystywanych usług. Więcej info: https://developers.google.com/appengine/docs/quotas"
 	def run(self, user, params):
 		response = u"Status usług:\n";
