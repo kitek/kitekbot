@@ -44,7 +44,7 @@ class HelpCommand(Command):
 
 		response = u"Lista dostępnych komend [%s]:\n"
 		counter = 0
-		for item in CommandDispatcher.commandNames:
+		for item in sorted(CommandDispatcher.commandNames.iterkeys()):
 			# Sprawdzamy czy posiadamy uprawnienia, jezeli tak to umieszczamy komende na liscie
 			if Acl.isAllowed(user, CommandDispatcher.commandNames[item].aclRole):
 				response+= u"* '/%s' - %s\n" % (item, CommandDispatcher.commandNames[item].description)
