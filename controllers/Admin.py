@@ -7,9 +7,9 @@ from models.Users import Users
 
 class AdminController(BaseController):
 	title = 'Panel administratora - Kitekbot'
-	
-	def get(self):
-		pass
-		
 
+	def get(self):
+		self.view['jid'] = self.currentUser.jid
+		self.view['usersTab'] = Users.getAll()
+		pass
 		

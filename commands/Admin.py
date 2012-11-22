@@ -20,24 +20,36 @@ class QuotaCommand(Command):
 	aclRole = 'admin'
 	description = u"Informacje o statusie wykorzystywanych przez Bot'a usług."
 	help = u"Informacje statusie wykorzystywanych usług. Więcej info: https://developers.google.com/appengine/docs/quotas"
+
+	""" 
+	dokumentacja twierdzi ze mamy tylko jedna metode - is_enabled() :
+		- https://developers.google.com/appengine/docs/python/capabilities/capabilitysetclass
+	ale wiekszy listing metod jest w zrodle (trunk): 
+		- http://code.google.com/p/googleappengine/source/browse/trunk/python/google/appengine/api/capabilities/__init__.py 
+	"""
+
 	def run(self, user, params):
 		response = u"Status usług:\n";
 		services = {'Datastore reads':'datastore_v3','XMPP':'xmpp','Memcache': 'memcache','URL Fetch':'urlfetch'}
 		
-		response+=u"* Datastore writes:"
+		response+=u"* Datastore writes: "
 		if capabilities.CapabilitySet("datastore_v3", ["write"]).is_enabled():
 			response+=u"OK"
 		else:
-			response+=u"ERROR"
+			response+=u"ERROR: " + capabilities.CapabilitySet(services[item]).admin_message() + "\n"
 		response+="\n"
 
 		for item in services:
 			response+=u"* "+item+": "
 			if capabilities.CapabilitySet(services[item]).is_enabled():
-				response+=u"OK"
+				if capabilities.CapabilitySet(services[item]).will_remain_enabled_for(86400):
+					response+=u"OK"
+				else:
+					response+=u"OK, ale planowany downtime w ciągu doby"
 			else:
-				response+=u"ERROR"
+				response+=u"ERROR: " + capabilities.CapabilitySet(services[item]).admin_message()
 			response+="\n"
+		response+="\nhttp://code.google.com/status/appengine\n"
 		Message.reply(response)
 
 class SetStatusCommand(Command):
