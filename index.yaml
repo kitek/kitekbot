@@ -13,7 +13,7 @@ indexes:
 - kind: Chats
   properties:
   - name: roomName
-  - name: __key__
+  - name: created
     direction: desc
 
 - kind: Sequence

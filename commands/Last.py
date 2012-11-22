@@ -13,7 +13,7 @@ class LastCommand(Command):
 	help = u"Dodatkowe parametry to: nazwa pokoju i limit rozmów np.: '/last pomoc 15'."
 	def run(self, user, params):
 		roomName = 'global'
-		limit = 5
+		limit = 15
 
 		if len(params) > 0:
 			roomName = params[0].lower().strip()
@@ -25,7 +25,7 @@ class LastCommand(Command):
 		if limit > self.LIMIT_MAX:
 			limit = self.LIMIT_MAX
 
-		chats = Chats.all().filter('roomName =',roomName).order('-__key__').fetch(limit=limit)
+		chats = Chats.all().filter('roomName =',roomName).order('-created').fetch(limit=limit)
 		if len(chats) == 0:
 			Message.reply(u"Brak ostatnich rozmów.")
 		else:
