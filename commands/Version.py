@@ -17,6 +17,7 @@ class VersionCommand(Command):
 		timestamp = long(version[1]) / pow(2,28) 
 
 		response = u"Wersja: %s\nData kompilacji: %s" % (version[0], datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S"))
+		response+= u"\n\nhttps://github.com/kitek/kitekbot\n"
 		Message.reply(response)
 
 CommandDispatcher.register('version', VersionCommand)
