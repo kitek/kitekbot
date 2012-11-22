@@ -14,15 +14,15 @@ class OnlineCommand(Command):
 	def run(self, user, params):
 		# Zapytanie o użytkowników online
 		response = u"Osoby online [%s z %s]:\n"
-		onlineCount = 0
+		onlineCount = 1
 		allUsers = Users.getAll(user.jid)
 		for item in allUsers:
 			if None == item.lastOnline:
 				response+=u"* "+re.sub(r'([\w\.-]+)@([\w\.-]+)', r'\1',item.jid)+"\n"
 				onlineCount+=1
-		response = response % (onlineCount,len(allUsers))
-		if 0 == onlineCount:
-			response+=u"brak osób"
+		response = response % (onlineCount,len(allUsers)+1)
+		if 1 == onlineCount:
+			response+=u"brak innych osób"
 		Message.reply(response)
 
 CommandDispatcher.register('online', OnlineCommand)

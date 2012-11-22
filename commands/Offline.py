@@ -20,9 +20,9 @@ class OfflineCommand(Command):
 			if None != item.lastOnline:
 				response+=u"* "+re.sub(r'([\w\.-]+)@([\w\.-]+)', r'\1',item.jid)+" ("+item.lastOnline.strftime('%Y-%m-%d %H:%M:%S')+")\n"
 				offlineCount+=1
-		response = response % (offlineCount,len(allUsers))
-		if 0 == offlineCount:
-			response+=u"brak osób"
+		response = response % (offlineCount,len(allUsers)+1)
+		if 1 == len(allUsers):
+			response+=u"brak innych osób"
 		Message.reply(response)
 
 CommandDispatcher.register('offline', OfflineCommand)
