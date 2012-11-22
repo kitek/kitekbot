@@ -23,10 +23,10 @@
           <a class="brand" href="/">Bot</a>
           <div class="nav-collapse collapse">
             <ul class="nav">
-              <li class="active"><a href="/">Home</a></li>
-              <li><a href="#about">About</a></li>
-              <li><a href="#contact">Contact</a></li>
-				  <li><a href="/admin">Admin</a></li>
+              <li{%if _activeTab == 'index'%} class="active"{%endif%}><a href="/">Home</a></li>
+              {%if _currentUser.aclRole in ['admin','owner']%}
+				        <li{%if _activeTab == 'admin'%} class="active"{%endif%}><a href="/admin">Admin</a></li>
+              {%endif%}
             </ul>
           </div>
         </div>

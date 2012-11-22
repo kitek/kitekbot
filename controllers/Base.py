@@ -6,6 +6,7 @@ import webapp2
 from webapp2_extras import jinja2
 from google.appengine.api import users
 from models.Users import Users
+from library.Acl import Acl
 from models.UsersSettings import UsersSettings
 
 
@@ -14,6 +15,8 @@ class BaseController(webapp2.RequestHandler):
 	layout = 'layouts/layout.html'
 	title = ''
 	view = {}
+	activeTab = 'index'
+	aclRole = 'user'
 	currentUser = None
 	def __init__(self, request, response):
 		# Set self.request, self.response and self.app.
@@ -28,10 +31,12 @@ class BaseController(webapp2.RequestHandler):
 		if not self.template:
 			self.template = type(self).__name__.replace('Controller','').lower()+'.html'
 		self.view['_template'] = self.template
+		self.view['_activeTab'] = self.activeTab
 		rv = self.jinja2.render_template(self.layout, **self.view)
 		self.response.write(rv)
 	def dispatch(self):
 		googleUser = users.get_current_user()
+		self.view['logoutURL'] = users.create_logout_url("/")
 		if not googleUser:
 			self.forbidden()
 			return
@@ -46,6 +51,11 @@ class BaseController(webapp2.RequestHandler):
 			else:
 				self.forbidden()
 				return
+		# Check ACL cefore dispatch
+		if False == Acl.isAllowed(self.currentUser, self.aclRole):
+			self.forbidden()
+			return
+		self.view['_currentUser'] = self.currentUser
 		try:
 			# Dispatch the request.
 			webapp2.RequestHandler.dispatch(self)

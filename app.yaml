@@ -18,9 +18,6 @@ handlers:
 - url: /img/(.*\.png)
   static_files: static/images/\1
   upload: static/images/(.*\.png)
-- url: /admin(/.*)?
-  script: main.app
-  login: admin
 - url: /.*
   script: main.app
   login: required
