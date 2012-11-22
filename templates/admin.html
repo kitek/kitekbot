@@ -1,1 +1,26 @@
-Admin panel here
+<style type="text/css">
+.div-table{display:table; border:0px solid #ddd;}
+.div-table-caption{display:table-caption; border: 1px #ddd; border-style: none dashed dashed dashed; text-align: center;}
+.div-table-tr{display:table-row; border: 0px solid #ddd; }
+.div-table-td{display:table-cell; padding: 5px; border: 1px #ddd; border-style: none none dashed dashed;}
+</style>
+
+Admin panel here<br />
+<br />
+<div class="div-table">
+	<div class="div-table-caption">tabela userow</div>
+		<div class="div-table-tr">
+			<div class="div-table-td" style="text-align: center;">user</div>
+			<div class="div-table-td" style="text-align: center;">acl</div>
+			<div class="div-table-td" style="text-align: center;">created</div>
+			<div class="div-table-td" style="text-align: center;">room</div>
+		</div>
+		{% for uzytkownik in usersTab %} {% if uzytkownik %}
+		<div class="div-table-tr">
+  				<div class="div-table-td">{% if uzytkownik.jid == jid %}<b>{{ uzytkownik.jid }}</b>{% else %} {{ uzytkownik.jid }} {% endif %}</div>
+				<div class="div-table-td">{{ uzytkownik.aclRole }}</div>
+				<div class="div-table-td">{{ uzytkownik.created }}</div>
+				<div class="div-table-td">{{ uzytkownik.currentRoom }}</div>
+		</div>
+		{%endif %}{% endfor %}
+</div>
