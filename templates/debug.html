@@ -8,7 +8,7 @@ Message: <textarea id="message">testowa wiadomość</textarea><br />
 		$('#send').bind('click', function(){
 			var to = $('#to').val(),
 				message = $('#message').val();			
-			$.post('/api/help/cyce',{'to':to,'body':message,'hash':'c0df65bf53f30cf3dac66253c7f57153','countdown':5},function(response) {
+			$.post('/api/message/send',{'to':to,'body':message,'hash':'c0df65bf53f30cf3dac66253c7f57153','countdown':0},function(response) {
 				console.log(response)
 			},'json');
 		});

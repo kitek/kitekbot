@@ -18,6 +18,8 @@ handlers:
 - url: /img/(.*\.png)
   static_files: static/images/\1
   upload: static/images/(.*\.png)
+- url: /api/.*
+  script: main.app
 - url: /.*
   script: main.app
   login: required

@@ -33,7 +33,7 @@ class ApiController(BaseController):
 			return
 
 		to = self.request.POST['to'].lower().strip()
-		body = self.request.POST['body'].lower().strip()
+		body = self.request.POST['body'].strip()
 		countdown = 0
 
 		# Sprawdz czy przeslano tresc
