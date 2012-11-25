@@ -1,6 +1,16 @@
-<h1>Xmpp Helper</h1><br />
 
-From: <input id="xmppFrom" type="text" value="{{xmppFrom}}" />
+To: <input type="text" value="bot@bot.pl" id="to"/><br />
+Message: <textarea id="message">testowa wiadomość</textarea><br />
+<input id="send" type="button" value="send" class="button"/>
 
-
-
+<script type="text/javascript">
+	$(function() {
+		$('#send').bind('click', function(){
+			var to = $('#to').val(),
+				message = $('#message').val();			
+			$.post('/api/help/cyce',{'to':to,'body':message,'hash':'c0df65bf53f30cf3dac66253c7f57153','countdown':5},function(response) {
+				console.log(response)
+			},'json');
+		});
+	});
+</script>

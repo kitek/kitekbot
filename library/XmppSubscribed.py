@@ -17,7 +17,7 @@ Implementuje:
 - Wysłanie wiadomości powitalnej do nowego użytkownika
 """
 class SubscribedHandler(XmppHandler):
-	WELCOME_MESSAGE = u"Witaj %s.\nWpisz wiadomość i wciśnij ENTER.\nLista obsługiwanych komend dostępna jest po wpisaniu: '/help'."
+	WELCOME_MESSAGE = u"Witaj %s.\nOd tej pory będziesz otrzymywał wiadomości od BOT'a.\nLista obsługiwanych komend dostępna jest po wpisaniu: '/help'."
 
 	def post(self):
 		logging.info("Subscribe confirmed (subscribed) from: %s", self.jid)
@@ -32,10 +32,8 @@ class SubscribedHandler(XmppHandler):
 		if self.data.has_key('invitedUser') and isinstance(self.data['invitedUser'], UsersInvited):
 			self.data['invitedUser'].delete()
 			del self.data['invitedUser']
+			# Broadcast do wszystkich
+			Message.broadcastSystem(u"Nowy użytkownik: %s" % (self.jid), roomName='global', exceptJid=self.jid)
 
 		Message.user = newUser
 		Message.reply(self.WELCOME_MESSAGE%(self.jidName))
-
-		# Broadcast do wszystkich
-		Message.broadcastSystem(u"Nowy użytkownik: %s" % (self.jid), roomName='global', exceptJid=self.jid)
-

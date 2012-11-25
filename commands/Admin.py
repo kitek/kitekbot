@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
+import os
 import logging
 import re
+from google.appengine.ext import db
 from google.appengine.api import xmpp
 from google.appengine.api import mail
 from google.appengine.api import memcache
@@ -10,6 +12,7 @@ from google.appengine.api import capabilities
 from google.appengine.api import app_identity
 from models.Users import Users
 from models.UsersInvited import UsersInvited
+from models.ApiAccess import ApiAccess
 from library.Message import Message
 from library.XmppCommand import Command
 from library.XmppCommand import CommandDispatcher
@@ -112,9 +115,52 @@ Zaproszenie wysłane przez %s.
 		# @todo Jak ogarnąć botMail'a (ustawienia w samej appki - jak to przechowywac?)
 
 
+
+class ApiCommand(Command):
+	"""
+	Zarejestrowane aplikacje przechowywane są w kolekcji: ApiAccess.
+
+	"""
+	aclRole = 'owner'
+	description = u"Umożliwia zarządzanie dostępem do Bot'a przez API HTTP."
+	help = u"Uruchomiona bez parametrów wyświetla zarejestrowane klucze dostępu. Umożliwia wygenerowanie nowego klucza przez wywołanie: '/api add nazwaAplikacji'."
+	limit = 1000
+	def run(self, user, params):
+		# Check if provided correct params
+		if len(params) == 2 and params[0] in ['add', 'del']:
+			# Add or delete
+			appName = params[1].lower().strip()
+			app = ApiAccess.all(keys_only=True).filter('appName =',appName).fetch(1)
+			if 'add' == params[0]:
+				if len(app):
+					Message.reply(u"Dostęp o nazwie '%s' już istnieje podaj inny." % (appName))
+				else:
+					apiKey = os.urandom(16).encode('hex')
+					ApiAccess(key_name=apiKey,appName=appName,authorJid=user.jid).put()
+					Message.reply(u"Klucz API dla '%s' to: '%s'. Więcej informacji na: https://github.com/kitek/kitekbot" % (appName, apiKey))
+			elif 'del' == params[0]:
+				# Remove key
+				if len(app):
+					db.delete(app[0])
+					Message.reply(u"Dostęp o nazwie '%s' został usunięty." % (appName))
+				else:
+					Message.reply(u"Brak dostępu o nazwie '%s'. Podaj inny." % (appName))
+			return
+		# Listujemy wszystkie dostępy wraz z dodatkowymi informacjami	
+		apiList = ApiAccess.all().fetch(self.limit)
+		response = u"Klucze do API:\n"
+		if len(apiList):
+			for item in apiList:
+				response+=u"* %s - %s \n" % (item.appName, item.key().name())
+		else:
+			response+= u"brak."
+		Message.reply(response)
+
+
+
 # Register commands
 
 CommandDispatcher.register('quota', QuotaCommand)
 CommandDispatcher.register('setstatus', SetStatusCommand)
 CommandDispatcher.register('inviteuser', InviteUserCommand)
-
+CommandDispatcher.register('api', ApiCommand)

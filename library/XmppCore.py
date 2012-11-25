@@ -22,7 +22,7 @@ class XmppHandler(webapp2.RequestHandler):
 	data = {'user':False,'body':''}
 
 	def dispatch(self):
-		self.jid = self.request.get('from').split('/')[0]
+		self.jid = self.request.get('from').split('/')[0].lower().strip()
 		self.jidName = self.jid.split('@')[0]
 		self.handlerName = type(self).__name__.replace('Handler','').lower()
 		if not self.jid:
